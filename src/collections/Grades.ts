@@ -2,6 +2,9 @@ import type { CollectionConfig } from 'payload'
 
 export const Grades: CollectionConfig = {
   slug: 'grades',
+  access: {
+    read: () => true, // Publicly readable
+  },
   admin: {
     useAsTitle: 'name',
   },
