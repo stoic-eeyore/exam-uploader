@@ -1,7 +1,8 @@
 'use client'
 
 import { useSession, signIn, signOut } from 'next-auth/react'
-import { useEffect, useState, CSSProperties } from 'react'
+import { useEffect, useState, CSSProperties, useRef } from 'react'
+import Link from 'next/link'
 
 type Option = {
   id: string
@@ -14,8 +15,9 @@ export default function UploadPage() {
   const [grades, setGrades] = useState<Option[]>([])
   const [subjects, setSubjects] = useState<Option[]>([])
   const [loading, setLoading] = useState(false)
-
   const [fileName, setFileName] = useState('')
+
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // 🔄 Fetch dropdown data
   useEffect(() => {
@@ -28,7 +30,6 @@ export default function UploadPage() {
       setGrades(gData.docs)
       setSubjects(sData.docs)
     }
-
     fetchData()
   }, [])
 
@@ -50,8 +51,7 @@ export default function UploadPage() {
     setLoading(true)
 
     const form = e.currentTarget
-
-    const file = (form.elements.namedItem('file') as HTMLInputElement).files?.[0]
+    const file = fileInputRef.current?.files?.[0]
 
     const grade = (form.elements.namedItem('grade') as HTMLSelectElement).value
     const subject = (form.elements.namedItem('subject') as HTMLSelectElement).value
@@ -103,16 +103,20 @@ export default function UploadPage() {
 
   return (
     <div style={styles.page}>
-      {/* Header */}
+      {/* Top Header: Navigation & Auth */}
       <div style={styles.header}>
-        <div>
-          <h2>Upload Exam</h2>
-          <p style={{ opacity: 0.7 }}>{session.user?.email}</p>
-        </div>
-
+        <Link href="/dashboard" style={styles.backLink}>
+          ← Back to Dashboard
+        </Link>
         <button style={styles.logoutBtn} onClick={() => signOut({ callbackUrl: '/' })}>
           Logout
         </button>
+      </div>
+
+      {/* Header */}
+      <div style={styles.titleSection}>
+        <h2 style={{ margin: 0 }}>Upload Exam</h2>
+        <p style={styles.userEmail}>{session.user?.email}</p>
       </div>
 
       {/* Form Card */}
@@ -152,15 +156,19 @@ export default function UploadPage() {
           </select>
 
           {/* File upload */}
-          <input
-            name="file"
-            type="file"
-            required
-            style={styles.input}
-            onChange={(e: any) => setFileName(e.target.files?.[0]?.name || '')}
-          />
-
-          {fileName && <p style={{ fontSize: 12, opacity: 0.7 }}>Selected: {fileName}</p>}
+          <div style={styles.fileBox} onClick={() => fileInputRef.current?.click()}>
+            <input
+              ref={fileInputRef}
+              type="file"
+              hidden
+              required
+              style={styles.input}
+              onChange={(e: any) => setFileName(e.target.files?.[0]?.name || '')}
+            />
+            <span style={{ color: fileName ? '#000' : '#666' }}>
+              {fileName || 'Click to select exam file (PDF/Doc)'}
+            </span>
+          </div>
 
           <button type="submit" disabled={loading} style={styles.primaryBtn}>
             {loading ? 'Uploading...' : 'Upload Exam'}
@@ -173,8 +181,8 @@ export default function UploadPage() {
 
 const styles: { [key: string]: CSSProperties } = {
   page: {
-    padding: 30,
-    maxWidth: 600,
+    padding: '20px 20px',
+    maxWidth: 500,
     margin: '0 auto',
     fontFamily: 'Arial',
   },
@@ -183,9 +191,22 @@ const styles: { [key: string]: CSSProperties } = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 12,
   },
-
+  backLink: {
+    textDecoration: 'none',
+    color: '#2563eb',
+    fontSize: 14,
+    fontWeight: 500,
+  },
+  titleSection: {
+    marginBottom: 10,
+  },
+  userEmail: {
+    fontSize: 13,
+    color: '#666',
+    marginTop: 4,
+  },
   card: {
     padding: 20,
     border: '1px solid #ddd',
@@ -204,7 +225,16 @@ const styles: { [key: string]: CSSProperties } = {
     border: '1px solid #ccc',
     fontSize: 14,
   },
-
+  fileBox: {
+    padding: '20px',
+    border: '2px dashed #d1d5db',
+    borderRadius: 8,
+    textAlign: 'center' as 'center',
+    cursor: 'pointer',
+    fontSize: 14,
+    backgroundColor: '#f9fafb',
+    transition: 'border-color 0.2s',
+  },
   primaryBtn: {
     padding: 12,
     background: '#2563eb',
