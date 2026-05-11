@@ -9,6 +9,7 @@ type Exam = {
   title?: string
   label?: string
   driveUrl?: string | null
+  year?: string
   createdAt?: string
   grade?: {
     name: string
