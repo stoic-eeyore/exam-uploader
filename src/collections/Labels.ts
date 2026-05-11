@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 
 export const Labels: CollectionConfig = {
   slug: 'labels',
@@ -10,4 +10,3 @@ export const Labels: CollectionConfig = {
     { name: 'term', type: 'text' },
   ],
 }
-

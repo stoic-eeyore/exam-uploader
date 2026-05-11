@@ -1,4 +1,4 @@
-import type { CollectionConfig } from 'payload/types'
+import type { CollectionConfig } from 'payload'
 
 export const Grades: CollectionConfig = {
   slug: 'grades',
@@ -11,4 +11,3 @@ export const Grades: CollectionConfig = {
     { name: 'order', type: 'number' },
   ],
 }
-
