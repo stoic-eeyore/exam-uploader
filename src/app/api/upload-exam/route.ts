@@ -36,6 +36,7 @@ export async function POST(req: Request) {
 
   const gradeName = gradeDoc?.code || gradeDoc?.name || 'Unknown Grade'
   const subjectName = subjectDoc?.code || subjectDoc?.name || 'Unknown Subject'
+  const name = `${gradeName}-${subjectName}-${data.year}-${data.label || 'Exam'}`
 
   // Convert file → buffer
   const buffer = Buffer.from(await file.arrayBuffer())
@@ -43,7 +44,7 @@ export async function POST(req: Request) {
   // Upload directly to Google Drive
   const driveUrl = await uploadToDrive({
     buffer,
-    filename: file.name,
+    filename: name,
     mimeType: file.type,
     year: data.year,
     grade: gradeName,

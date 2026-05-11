@@ -25,9 +25,6 @@ export default function UploadPage() {
       const gData = await gRes.json()
       const sData = await sRes.json()
 
-      console.dir(gData.docs)
-      console.dir(sData.docs)
-
       setGrades(gData.docs)
       setSubjects(sData.docs)
     }
@@ -121,7 +118,7 @@ export default function UploadPage() {
       {/* Form Card */}
       <div style={styles.card}>
         <form onSubmit={handleSubmit} style={styles.form}>
-          <input name="title" placeholder="Title (optional)" style={styles.input} />
+          <input name="title" type="hidden" placeholder="Title (optional)" style={styles.input} />
 
           {/* Grade dropdown */}
           <select name="grade" required style={styles.input}>

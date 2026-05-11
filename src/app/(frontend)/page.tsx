@@ -10,27 +10,29 @@ export default function Home() {
 
   useEffect(() => {
     if (session) {
-      router.push('/dashboard/upload')
+      router.push('/dashboard')
     }
   }, [session])
 
   return (
-    <div style={{
-      display: 'flex',
-      height: '100vh',
-      alignItems: 'center',
-      justifyContent: 'center',
-      flexDirection: 'column',
-      gap: '20px'
-    }}>
+    <div
+      style={{
+        display: 'flex',
+        height: '100vh',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flexDirection: 'column',
+        gap: '20px',
+      }}
+    >
       <h1>Exam Upload System</h1>
 
       <button
-        onClick={() => signIn('google', { callbackUrl: '/dashboard'})}
+        onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
         style={{
           padding: '12px 20px',
           fontSize: '16px',
-          cursor: 'pointer'
+          cursor: 'pointer',
         }}
       >
         Sign in with Google
@@ -38,4 +40,3 @@ export default function Home() {
     </div>
   )
 }
-
