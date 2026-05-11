@@ -18,7 +18,7 @@ function sanitizeFolderName(name: string) {
   return name.replace(/\//g, '-')
 }
 
-async function findOrCreateFolder(name: string, parentId?: string) {
+async function findOrCreateFolder(name: string, parentId?: string): Promise<string> {
   const query = [
     `mimeType='application/vnd.google-apps.folder'`,
     `name='${name}'`,
@@ -34,7 +34,7 @@ async function findOrCreateFolder(name: string, parentId?: string) {
   })
 
   if (res.data.files && res.data.files.length > 0) {
-    return res.data.files[0].id
+    return res.data.files[0].id!
   }
 
   // Create folder if not exists
@@ -48,7 +48,7 @@ async function findOrCreateFolder(name: string, parentId?: string) {
     supportsAllDrives: true,
   })
 
-  return folder.data.id
+  return folder.data.id!
 }
 
 async function getFolderPathIds({
@@ -81,11 +81,10 @@ export async function uploadToDrive({
   filename: string
   mimeType: string
   year: string
-  grade: string | number
-  subject: string | number
+  grade: string
+  subject: string
 }) {
   const parentFolderId = await getFolderPathIds({
-    drive,
     year,
     grade,
     subject,
@@ -104,7 +103,7 @@ export async function uploadToDrive({
     fields: 'id',
   })
 
-  const fileId = response.data.id
+  const fileId = response.data.id!
 
   await drive.permissions.create({
     fileId,
