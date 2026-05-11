@@ -1,7 +1,7 @@
 'use client'
 
 import { useSession, signIn, signOut } from 'next-auth/react'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, CSSProperties } from 'react'
 
 type Option = {
   id: string
@@ -20,10 +20,7 @@ export default function UploadPage() {
   // 🔄 Fetch dropdown data
   useEffect(() => {
     async function fetchData() {
-      const [gRes, sRes] = await Promise.all([
-        fetch('/api/grades'),
-        fetch('/api/subjects'),
-      ])
+      const [gRes, sRes] = await Promise.all([fetch('/api/grades'), fetch('/api/subjects')])
 
       const gData = await gRes.json()
       const sData = await sRes.json()
@@ -54,24 +51,24 @@ export default function UploadPage() {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setLoading(true)
-  
+
     const form = e.currentTarget
-  
+
     const file = (form.elements.namedItem('file') as HTMLInputElement).files?.[0]
-  
+
     const grade = (form.elements.namedItem('grade') as HTMLSelectElement).value
     const subject = (form.elements.namedItem('subject') as HTMLSelectElement).value
     const label = (form.elements.namedItem('label') as HTMLInputElement).value
     const year = (form.elements.namedItem('year') as HTMLSelectElement).value
     const title = (form.elements.namedItem('title') as HTMLInputElement).value
-  
+
     const payload = new FormData(form)
-  
+
     // Append file
     if (file) {
       payload.append('file', file)
     }
-  
+
     // Append metadata
     payload.append(
       '_payload',
@@ -81,21 +78,21 @@ export default function UploadPage() {
         subject: Number(subject),
         label,
         year,
-      })
+      }),
     )
-  
+
     // Debug
     for (const [key, value] of payload.entries()) {
       console.log(key, value)
     }
-  
+
     const res = await fetch('/api/upload-exam', {
       method: 'POST',
       body: payload,
     })
-  
+
     setLoading(false)
-  
+
     if (res.ok) {
       alert('Uploaded successfully!')
       form.reset()
@@ -124,13 +121,12 @@ export default function UploadPage() {
       {/* Form Card */}
       <div style={styles.card}>
         <form onSubmit={handleSubmit} style={styles.form}>
-
-          <input name="title" placeholder="Title (optional)" style={styles.input} /> 
+          <input name="title" placeholder="Title (optional)" style={styles.input} />
 
           {/* Grade dropdown */}
           <select name="grade" required style={styles.input}>
             <option value="">Select Grade</option>
-            {grades?.map(g => (
+            {grades?.map((g) => (
               <option key={g.id} value={g.id}>
                 {g.name}
               </option>
@@ -140,7 +136,7 @@ export default function UploadPage() {
           {/* Subject dropdown */}
           <select name="subject" required style={styles.input}>
             <option value="">Select Subject</option>
-            {subjects?.map(s => (
+            {subjects?.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.name}
               </option>
@@ -167,11 +163,7 @@ export default function UploadPage() {
             onChange={(e: any) => setFileName(e.target.files?.[0]?.name || '')}
           />
 
-          {fileName && (
-            <p style={{ fontSize: 12, opacity: 0.7 }}>
-              Selected: {fileName}
-            </p>
-          )}
+          {fileName && <p style={{ fontSize: 12, opacity: 0.7 }}>Selected: {fileName}</p>}
 
           <button type="submit" disabled={loading} style={styles.primaryBtn}>
             {loading ? 'Uploading...' : 'Upload Exam'}
@@ -182,7 +174,7 @@ export default function UploadPage() {
   )
 }
 
-const styles = {
+const styles: { [key: string]: CSSProperties } = {
   page: {
     padding: 30,
     maxWidth: 600,
@@ -243,4 +235,3 @@ const styles = {
     gap: 12,
   },
 }
-
