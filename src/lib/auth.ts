@@ -1,7 +1,8 @@
 import NextAuth from 'next-auth'
 import GoogleProvider from 'next-auth/providers/google'
+import type { NextAuthOptions } from 'next-auth'
 
-export const authOptions = {
+export const authOptions: NextAuthOptions = {
   debug: true,
 
   providers: [
@@ -40,8 +41,10 @@ export const authOptions = {
     },
 
     async session({ session, token }) {
-      session.user.email = token.email
-      session.user.name = token.name
+      if (session?.user) {
+        session.user.email = token.email
+        session.user.name = token.name
+      }
       return session
     },
   },
