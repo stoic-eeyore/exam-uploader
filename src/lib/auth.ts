@@ -18,6 +18,9 @@ export const authOptions = {
 
   callbacks: {
     async signIn({ profile }) {
+      if (!profile?.email) {
+        return false
+      }
       const email = profile?.email || ''
       const name = profile?.name || ''
 
