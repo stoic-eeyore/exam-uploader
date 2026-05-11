@@ -19,6 +19,14 @@ export default function UploadPage() {
 
   const fileInputRef = useRef<HTMLInputElement>(null)
 
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
+
+  // Function to trigger the toast and auto-hide it
+  const showToast = (message: string, type: 'success' | 'error') => {
+    setToast({ message, type })
+    setTimeout(() => setToast(null), 3000) // Hide after 3 seconds
+  }
+
   // 🔄 Fetch dropdown data
   useEffect(() => {
     async function fetchData() {
@@ -91,13 +99,13 @@ export default function UploadPage() {
     setLoading(false)
 
     if (res.ok) {
-      alert('Uploaded successfully!')
+      showToast('Uploaded successfully!', 'success')
       form.reset()
       setFileName('')
     } else {
       const error = await res.text()
       console.log(error)
-      alert('Upload failed')
+      showToast('Upload failed', 'error')
     }
   }
 
@@ -175,6 +183,16 @@ export default function UploadPage() {
           </button>
         </form>
       </div>
+      {toast && (
+        <div
+          style={{
+            ...styles.toast,
+            backgroundColor: toast.type === 'success' ? '#10b981' : '#ef4444',
+          }}
+        >
+          {toast.type === 'success' ? '✅' : '❌'} {toast.message}
+        </div>
+      )}
     </div>
   )
 }
@@ -199,7 +217,7 @@ const styles: { [key: string]: CSSProperties } = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 20,
   },
   backLink: {
     textDecoration: 'none',
@@ -210,7 +228,7 @@ const styles: { [key: string]: CSSProperties } = {
   userEmail: {
     fontSize: 12,
     color: '#6b7280', // Match dashboard subtitle color
-    marginTop: 2,
+    marginTop: 12,
   },
   titleSection: {
     marginBottom: 10,
