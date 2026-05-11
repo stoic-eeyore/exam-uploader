@@ -8,7 +8,7 @@ type Exam = {
   id: number
   title?: string
   label?: string
-  driveUrl?: string | null;
+  driveUrl?: string | null
   createdAt?: string
   grade?: {
     name: string
@@ -45,74 +45,67 @@ export default function DashboardPage() {
 
   return (
     <div style={styles.page}>
-      {/* Header */}
-      <div style={styles.header}>
-        <div>
-          <h1>Exam Dashboard</h1>
-          <p>{session?.user?.email}</p>
+      <div style={styles.container}>
+        {/* Header & Stats Inline */}
+        <div style={styles.header}>
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <h1 style={styles.title}>Dashboard</h1>
+              <span style={styles.totalBadge}>{totalExams} Exams</span>
+            </div>
+            <p style={styles.subtitle}>{session?.user?.email}</p>
+          </div>
+
+          <div style={{ display: 'flex', gap: 8 }}>
+            <Link href="/dashboard/upload">
+              <button style={styles.primaryBtn}>+ Upload</button>
+            </Link>
+            <button style={styles.logoutBtn} onClick={() => signOut({ callbackUrl: '/' })}>
+              Logout
+            </button>
+          </div>
         </div>
 
-        <button
-          style={styles.logoutBtn}
-          onClick={() => signOut({ callbackUrl: '/' })}
-        >
-          Logout
-        </button>
-      </div>
-
-      {/* Stats */}
-      <div style={styles.statsGrid}>
+        {/* Recent uploads Table */}
         <div style={styles.card}>
-          <h2>{totalExams}</h2>
-          <p>Total Exams</p>
+          <h3 style={styles.tableTitle}>Recently Uploaded</h3>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={styles.table}>
+              <thead>
+                <tr>
+                  <th style={styles.th}>Grade</th>
+                  <th style={styles.th}>Subject</th>
+                  <th style={styles.th}>Label</th>
+                  <th style={styles.th}>Year</th>
+                  <th style={{ ...styles.th, textAlign: 'right' }}>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recent.map((exam) => (
+                  <tr key={exam.id} style={styles.tr}>
+                    <td style={styles.td}>
+                      <strong>{exam.grade?.name || '-'}</strong>
+                    </td>
+                    <td style={styles.td}>{exam.subject?.name || '-'}</td>
+                    <td style={styles.td}>
+                      {exam.label ? <span style={styles.badge}>{exam.label}</span> : '-'}
+                    </td>
+                    <td style={styles.td}>{exam.year}</td>
+                    <td style={{ ...styles.td, textAlign: 'right' }}>
+                      {exam.driveUrl ? (
+                        <a href={exam.driveUrl} target="_blank" style={styles.linkBtn}>
+                          View
+                        </a>
+                      ) : (
+                        '-'
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
-
-      {/* Actions */}
-      <div style={{ marginBottom: 20 }}>
-        <Link href="/dashboard/upload">
-          <button style={styles.primaryBtn}>
-            Upload New Exam
-          </button>
-        </Link>
-      </div>
-
-      {/* Recent uploads */}
-      <div style={styles.card}>
-        <h3>Recent Uploads</h3>
-
-        <table style={styles.table}>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Grade</th>
-              <th>Subject</th>
-              <th>Label</th>
-              <th></th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {recent.map((exam) => (
-              <tr key={exam.id}>
-                <td>
-                  {exam.createdAt
-                    ? new Date(exam.createdAt).toLocaleDateString()
-                    : '-'}
-                </td>
-
-                <td>{exam.grade?.name || '-'}</td>
-                <td>{exam.subject?.name || '-'}</td>
-                <td>{exam.label || '-'}</td>
-                <td>
-                  {exam.driveUrl
-                    ? <a href={exam.driveUrl} target="_blank">Link</a>
-                    : '-'}
-               </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
       </div>
     </div>
   )
@@ -120,62 +113,74 @@ export default function DashboardPage() {
 
 const styles: any = {
   page: {
-    maxWidth: 1000,
-    margin: '0 auto',
-    padding: 30,
-    fontFamily: 'Arial',
+    minHeight: '100vh',
+    backgroundColor: '#f9fafb',
+    padding: '20px',
+    fontFamily: '-apple-system, system-ui, sans-serif',
   },
-
+  container: {
+    maxWidth: 800, // Narrower container for a tighter look
+    margin: '0 auto',
+  },
   header: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 30,
+    marginBottom: 20,
   },
-
-  statsGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-    gap: 20,
-    marginBottom: 30,
+  title: { margin: 0, fontSize: 32, fontWeight: 700, color: '#111827' },
+  totalBadge: {
+    backgroundColor: '#e0e7ff',
+    color: '#4338ca',
+    padding: '2px 8px',
+    borderRadius: 6,
+    fontSize: 12,
+    fontWeight: 600,
   },
-
+  subtitle: { margin: 0, color: '#6b7280', fontSize: 13 },
   card: {
-    border: '1px solid #ddd',
-    borderRadius: 12,
-    padding: 20,
     background: 'white',
-    color: '#111',
+    borderRadius: 8,
+    padding: '16px 20px',
+    border: '1px solid #e5e7eb',
+    boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
   },
-
-  table: {
-    width: '100%',
-    borderCollapse: 'collapse',
-  },
-
-  thtd: {
-    padding: 12,
-    borderBottom: '1px solid #eee',
+  tableTitle: { marginTop: 0, marginBottom: 16, fontSize: 16, fontWeight: 600, color: '#374151' },
+  table: { width: '100%', borderCollapse: 'collapse' },
+  th: {
     textAlign: 'left',
-    color: '#111',
+    padding: '10px 0',
+    color: '#6b7280',
+    fontSize: 11,
+    textTransform: 'uppercase',
+    borderBottom: '1px solid #f3f4f6',
   },
-
+  td: { padding: '12px 0', fontSize: 14, color: '#374151', borderBottom: '1px solid #f3f4f6' },
+  badge: {
+    backgroundColor: '#f3f4f6',
+    color: '#374151',
+    padding: '2px 8px',
+    borderRadius: 4,
+    fontSize: 12,
+  },
+  linkBtn: { color: '#2563eb', textDecoration: 'none', fontWeight: 600, fontSize: 13 },
   primaryBtn: {
-    padding: '12px 20px',
+    padding: '8px 14px',
     background: '#2563eb',
     color: 'white',
     border: 'none',
-    borderRadius: 8,
+    borderRadius: 6,
     cursor: 'pointer',
+    fontWeight: 600,
+    fontSize: 13,
   },
-
   logoutBtn: {
-    padding: '10px 16px',
-    background: '#ef4444',
-    color: 'white',
-    border: 'none',
-    borderRadius: 8,
+    padding: '8px 12px',
+    background: 'transparent',
+    color: '#6b7280',
+    border: '1px solid #d1d5db',
+    borderRadius: 6,
     cursor: 'pointer',
+    fontSize: 13,
   },
 }
-

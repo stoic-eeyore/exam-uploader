@@ -115,7 +115,7 @@ export default function UploadPage() {
 
       {/* Header */}
       <div style={styles.titleSection}>
-        <h2 style={{ margin: 0 }}>Upload Exam</h2>
+        <h2 style={styles.titleText}>Upload Exam</h2>
         <p style={styles.userEmail}>{session.user?.email}</p>
       </div>
 
@@ -181,12 +181,20 @@ export default function UploadPage() {
 
 const styles: { [key: string]: CSSProperties } = {
   page: {
+    minHeight: '100vh',
+    backgroundColor: '#f9fafb', // Match dashboard bg
     padding: '20px 20px',
     maxWidth: 500,
     margin: '0 auto',
-    fontFamily: 'Arial',
+    fontFamily: '-apple-system, system-ui, sans-serif', // Match dashboard font
   },
-
+  titleText: {
+    margin: 0,
+    fontSize: '32px',
+    fontWeight: 700,
+    color: '#111827', // Dark Slate (nearly black) for visibility
+    letterSpacing: '-0.02em',
+  },
   header: {
     display: 'flex',
     justifyContent: 'space-between',
@@ -196,34 +204,29 @@ const styles: { [key: string]: CSSProperties } = {
   backLink: {
     textDecoration: 'none',
     color: '#2563eb',
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: 500,
+  },
+  userEmail: {
+    fontSize: 12,
+    color: '#6b7280', // Match dashboard subtitle color
+    marginTop: 2,
   },
   titleSection: {
     marginBottom: 10,
   },
-  userEmail: {
-    fontSize: 13,
-    color: '#666',
-    marginTop: 4,
-  },
   card: {
-    padding: 20,
-    border: '1px solid #ddd',
-    borderRadius: 10,
+    padding: 24,
+    backgroundColor: '#ffffff',
+    border: '1px solid #e5e7eb',
+    borderRadius: 12,
+    boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
   },
 
   form: {
     display: 'flex',
     flexDirection: 'column',
     gap: 12,
-  },
-
-  input: {
-    padding: 10,
-    borderRadius: 6,
-    border: '1px solid #ccc',
-    fontSize: 14,
   },
   fileBox: {
     padding: '20px',
@@ -235,24 +238,31 @@ const styles: { [key: string]: CSSProperties } = {
     backgroundColor: '#f9fafb',
     transition: 'border-color 0.2s',
   },
+  input: {
+    padding: '10px 12px',
+    borderRadius: 8,
+    border: '1px solid #d1d5db',
+    fontSize: 14,
+    outline: 'none',
+  },
   primaryBtn: {
     padding: 12,
     background: '#2563eb',
     color: 'white',
     border: 'none',
-    borderRadius: 6,
+    borderRadius: 8,
     cursor: 'pointer',
+    fontWeight: 600,
   },
-
   logoutBtn: {
-    padding: 8,
-    background: '#ef4444',
-    color: 'white',
-    border: 'none',
+    padding: '6px 12px',
+    background: 'transparent', // Match dashboard logout
+    color: '#6b7280',
+    border: '1px solid #d1d5db',
     borderRadius: 6,
     cursor: 'pointer',
+    fontSize: 13,
   },
-
   center: {
     height: '100vh',
     display: 'flex',
