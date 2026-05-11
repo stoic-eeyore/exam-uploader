@@ -8,6 +8,7 @@ type Exam = {
   id: number
   title?: string
   label?: string
+  driveUrl?: string | null;
   createdAt?: string
   grade?: {
     name: string
