@@ -23,14 +23,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [
-	  Users, 
-	  Media,
-	  Grades,
-          Subjects,
-          Labels,
-          Exams,
-  ],
+  collections: [Users, Media, Grades, Subjects, Labels, Exams],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
@@ -45,3 +38,5 @@ export default buildConfig({
   sharp,
   plugins: [],
 })
+
+console.log('VERCEL REGION:', process.env.VERCEL_REGION)
