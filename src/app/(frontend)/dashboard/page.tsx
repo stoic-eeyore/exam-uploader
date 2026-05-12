@@ -68,10 +68,6 @@ export default function DashboardPage() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [showDevColumn])
 
-  if (status === 'loading' || loading) {
-    return <p style={{ padding: 30 }}>Loading...</p>
-  }
-
   return (
     <div style={styles.page}>
       <div style={styles.container}>
@@ -80,9 +76,9 @@ export default function DashboardPage() {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <h1 style={styles.title}>Dashboard</h1>
-              <span style={styles.totalBadge}>{totalExams} Exams</span>
+              <span style={styles.totalBadge}>{loading ? '...' : `${totalExams} Exams`}</span>
             </div>
-            <p style={styles.subtitle}>{session?.user?.email}</p>
+            <p style={styles.subtitle}>{session?.user?.email || '...'}</p>
           </div>
 
           <div style={{ display: 'flex', gap: 8 }}>

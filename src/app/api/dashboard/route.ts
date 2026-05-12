@@ -4,23 +4,22 @@ import { NextResponse } from 'next/server'
 export async function GET() {
   const payload = await getPayloadClient()
 
-  // Total exams
-  const exams = await payload.find({
-    collection: 'exams',
-    limit: 0,
-  })
+  const [examsCount, recentUploads] = await Promise.all([
+    payload.count({
+      collection: 'exams',
+    }),
 
-  // Recent uploads
-  const recent = await payload.find({
-    collection: 'exams',
-    limit: 5,
-    sort: '-createdAt',
-    depth: 1,
-  })
+    payload.find({
+      collection: 'exams',
+      limit: 10,
+      sort: '-createdAt',
+      // Switch to depth: 0 if you don't need related user/category objects populated
+      depth: 1,
+    }),
+  ])
 
   return NextResponse.json({
-    totalExams: exams.totalDocs,
-    recent: recent.docs,
+    totalExams: examsCount.totalDocs,
+    recent: recentUploads.docs,
   })
 }
-

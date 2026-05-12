@@ -10,15 +10,15 @@ type Option = {
 }
 
 export default function UploadPage() {
-  const { data: session, status } = useSession()
+  const { data: session } = useSession()
 
   const [grades, setGrades] = useState<Option[]>([])
   const [subjects, setSubjects] = useState<Option[]>([])
   const [loading, setLoading] = useState(false)
+  const [dropdownLoading, setDropdownLoading] = useState(true)
   const [fileName, setFileName] = useState('')
 
   const fileInputRef = useRef<HTMLInputElement>(null)
-
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
 
   // Function to trigger the toast and auto-hide it
@@ -30,29 +30,25 @@ export default function UploadPage() {
   // 🔄 Fetch dropdown data
   useEffect(() => {
     async function fetchData() {
-      const [gRes, sRes] = await Promise.all([fetch('/api/grades'), fetch('/api/subjects')])
+      try {
+        const [gRes, sRes] = await Promise.all([fetch('/api/grades'), fetch('/api/subjects')])
 
-      const gData = await gRes.json()
-      const sData = await sRes.json()
+        if (!gRes.ok || !sRes.ok) throw new Error('API Dataset failure')
 
-      setGrades(gData.docs)
-      setSubjects(sData.docs)
+        const gData = await gRes.json()
+        const sData = await sRes.json()
+
+        setGrades(gData.docs)
+        setSubjects(sData.docs)
+      } catch (err) {
+        console.error('Dropdown error:', err)
+        showToast('Failed to load form parameters', 'error')
+      } finally {
+        setDropdownLoading(false)
+      }
     }
     fetchData()
   }, [])
-
-  if (status === 'loading') return <p>Loading...</p>
-
-  if (!session) {
-    return (
-      <div style={styles.center}>
-        <h2>Exam Upload System</h2>
-        <button style={styles.primaryBtn} onClick={() => signIn('google')}>
-          Sign in with Google
-        </button>
-      </div>
-    )
-  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -85,11 +81,6 @@ export default function UploadPage() {
         year,
       }),
     )
-
-    // Debug
-    for (const [key, value] of payload.entries()) {
-      console.log(key, value)
-    }
 
     const res = await fetch('/api/upload-exam', {
       method: 'POST',
@@ -124,7 +115,7 @@ export default function UploadPage() {
       {/* Header */}
       <div style={styles.titleSection}>
         <h2 style={styles.titleText}>Upload Exam</h2>
-        <p style={styles.userEmail}>{session.user?.email}</p>
+        <p style={styles.userEmail}>{session?.user?.email || '...'}</p>
       </div>
 
       {/* Form Card */}
@@ -133,8 +124,8 @@ export default function UploadPage() {
           <input name="title" type="hidden" placeholder="Title (optional)" style={styles.input} />
 
           {/* Grade dropdown */}
-          <select name="grade" required style={styles.input}>
-            <option value="">Select Grade</option>
+          <select name="grade" required style={styles.input} disabled={dropdownLoading}>
+            <option value="">{dropdownLoading ? 'Loading grades...' : 'Select Grade'}</option>
             {grades?.map((g) => (
               <option key={g.id} value={g.id}>
                 {g.name}
@@ -143,8 +134,8 @@ export default function UploadPage() {
           </select>
 
           {/* Subject dropdown */}
-          <select name="subject" required style={styles.input}>
-            <option value="">Select Subject</option>
+          <select name="subject" required style={styles.input} disabled={dropdownLoading}>
+            <option value="">{dropdownLoading ? 'Loading subjects...' : 'Select Subject'}</option>
             {subjects?.map((s) => (
               <option key={s.id} value={s.id}>
                 {s.name}
@@ -183,6 +174,7 @@ export default function UploadPage() {
           </button>
         </form>
       </div>
+
       {toast && (
         <div
           style={{
@@ -288,5 +280,22 @@ const styles: { [key: string]: CSSProperties } = {
     justifyContent: 'center',
     alignItems: 'center',
     gap: 12,
+  },
+  loadingOverlay: {
+    position: 'absolute' as 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: '#f9fafb', // Perfectly matches your background layout color
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10,
+  },
+  loadingText: {
+    fontSize: 14,
+    color: '#6b7280',
+    fontWeight: 500,
   },
 }
