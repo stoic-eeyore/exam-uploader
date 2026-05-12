@@ -245,6 +245,16 @@ export interface Exam {
   filename?: string | null;
   mimeType?: string | null;
   filesize?: number | null;
+  aiAnalysis?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  aiRawResponse?: string | null;
   uploadedBy?: (number | null) | User;
   uploadedAt?: string | null;
   updatedAt: string;
@@ -427,6 +437,8 @@ export interface ExamsSelect<T extends boolean = true> {
   filename?: T;
   mimeType?: T;
   filesize?: T;
+  aiAnalysis?: T;
+  aiRawResponse?: T;
   uploadedBy?: T;
   uploadedAt?: T;
   updatedAt?: T;

@@ -97,6 +97,19 @@ export const Exams: CollectionConfig = {
     },
 
     {
+      name: 'aiAnalysis',
+      type: 'json',
+      admin: {
+        readOnly: true,
+      },
+    },
+
+    {
+      name: 'aiRawResponse',
+      type: 'textarea',
+    },
+
+    {
       name: 'uploadedBy',
       type: 'relationship',
       relationTo: 'users',

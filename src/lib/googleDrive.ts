@@ -116,3 +116,29 @@ export async function uploadToDrive({
 
   return `https://drive.google.com/file/d/${fileId}/view`
 }
+
+export function extractDriveFileId(url: string) {
+  const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/)
+
+  return match?.[1]
+}
+
+export async function downloadDriveFile(driveUrl: string) {
+  const fileId = extractDriveFileId(driveUrl)
+
+  if (!fileId) {
+    throw new Error('Invalid Drive URL')
+  }
+
+  const response = await drive.files.get(
+    {
+      fileId,
+      alt: 'media',
+    },
+    {
+      responseType: 'arraybuffer',
+    },
+  )
+
+  return Buffer.from(response.data as ArrayBuffer)
+}
