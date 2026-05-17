@@ -1,6 +1,7 @@
 import NextAuth from 'next-auth'
 import GoogleProvider from 'next-auth/providers/google'
 import type { NextAuthOptions } from 'next-auth'
+import { syncUser } from './syncUser'
 
 export const authOptions: NextAuthOptions = {
   debug: true,
@@ -29,6 +30,8 @@ export const authOptions: NextAuthOptions = {
       if (!email.endsWith('@sekolahbim.sch.id')) {
         return false
       }
+
+      await syncUser({ email, name })
       return true
     },
 
