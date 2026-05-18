@@ -31,7 +31,10 @@ export default function UploadPage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const [gRes, sRes] = await Promise.all([fetch('/api/grades'), fetch('/api/subjects')])
+        const [gRes, sRes] = await Promise.all([
+          fetch('/api/grades?limit=100'),
+          fetch('/api/subjects?limit=100'),
+        ])
 
         if (!gRes.ok || !sRes.ok) throw new Error('API Dataset failure')
 
