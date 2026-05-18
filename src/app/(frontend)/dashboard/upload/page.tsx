@@ -254,6 +254,8 @@ const styles: { [key: string]: CSSProperties } = {
     border: '1px solid #d1d5db',
     fontSize: 14,
     outline: 'none',
+    color: '#111827',
+    backgroundColor: '#ffffff',
   },
   primaryBtn: {
     padding: 12,
