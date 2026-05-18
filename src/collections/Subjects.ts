@@ -9,7 +9,7 @@ export const Subjects: CollectionConfig = {
     useAsTitle: 'name',
   },
   fields: [
-    { name: 'name', type: 'text', required: true },
-    { name: 'code', type: 'text' },
+    { name: 'name', type: 'text', required: true, unique: true },
+    { name: 'code', type: 'text', required: true, unique: true },
   ],
 }

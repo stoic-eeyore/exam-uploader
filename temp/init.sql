@@ -11,7 +11,7 @@ VALUES
 ('Secondary 3', 'S3', 14, NOW(), NOW()),
 ('Secondary 4', 'S4', 15, NOW(), NOW()),
 ('Secondary 5', 'S5', 16, NOW(), NOW()),
-('Secondary 6', 'S5', 16, NOW(), NOW());
+('Secondary 6', 'S6', 16, NOW(), NOW());
 
 INSERT INTO subjects (name, code, updated_at, created_at)
 VALUES
@@ -21,3 +21,10 @@ VALUES
 ('Mandarin', 'MAND', NOW(), NOW()),
 ('Science', 'SCI', NOW(), NOW()),
 ('IPAS', 'IPAS', NOW(), NOW());
+
+INSERT INTO subjects (name, code, updated_at, created_at)
+VALUES
+('PKN', 'PKN', NOW(), NOW());
+
+INSERT INTO subjects (name, code, updated_at, created_at) VALUES ('Sejarah', 'SEJ', NOW(), NOW());
+INSERT INTO subjects (name, code, updated_at, created_at) VALUES ('Kimia', 'KIM', NOW(), NOW());

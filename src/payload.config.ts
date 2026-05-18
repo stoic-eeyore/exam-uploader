@@ -9,6 +9,8 @@ import { Users } from './collections/Users'
 import { Media } from './collections/Media'
 
 import { Exams } from './collections/Exams'
+import { PendingExams } from './collections/PendingExams'
+import { GeminiMappings } from './collections/GeminiMappings'
 import { Grades } from './collections/Grades'
 import { Subjects } from './collections/Subjects'
 import { Labels } from './collections/Labels'
@@ -23,7 +25,7 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Grades, Subjects, Labels, Exams],
+  collections: [Users, Media, Grades, Subjects, Labels, Exams, PendingExams, GeminiMappings],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {

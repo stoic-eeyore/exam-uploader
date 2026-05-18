@@ -28,11 +28,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Exam has no driveUrl' }, { status: 400 })
     }
 
-    const buffer = await downloadDriveFile(exam.driveUrl)
+    const downloadResult = await downloadDriveFile(exam.driveUrl)
 
     console.log('uploading file to Gemini')
     const uploadedFile = await uploadFileToGemini({
-      buffer,
+      buffer: downloadResult.buffer,
       mimeType: exam.mimeType || 'application/pdf',
       filename: exam.filename || 'exam.pdf',
     })
