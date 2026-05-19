@@ -18,7 +18,7 @@ export async function POST() {
 
     for (const file of files) {
       // Ignore temporary files
-      if (file.name?.toLowerCase().startsWith('Temp_')) {
+      if (file.name?.toLowerCase().startsWith('temp_')) {
         console.log(`Skipping temp file: ${file.name}`)
         continue
       }
