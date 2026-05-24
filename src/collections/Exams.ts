@@ -110,6 +110,11 @@ export const Exams: CollectionConfig = {
     },
 
     {
+      name: 'fileHash',
+      type: 'text',
+    },
+
+    {
       name: 'uploadedBy',
       type: 'relationship',
       relationTo: 'users',

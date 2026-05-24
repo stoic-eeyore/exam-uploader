@@ -10,6 +10,9 @@ export const PendingExams: CollectionConfig = {
 
   access: {
     read: () => true, // Publicly readable
+    update: () => true,
+    //FIXME: For now, allow anyone to update
+    //update: ({ req: { user } }) => Boolean(user), // Only logged-in user
   },
 
   fields: [
@@ -33,6 +36,13 @@ export const PendingExams: CollectionConfig = {
       name: 'driveUrl',
       type: 'text',
       required: true,
+    },
+
+    {
+      name: 'driveFileId',
+      type: 'text',
+      required: true,
+      defaultValue: '',
     },
 
     {

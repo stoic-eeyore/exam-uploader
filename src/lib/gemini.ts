@@ -10,7 +10,8 @@ export const genAI = new GoogleGenerativeAI(apiKey)
 
 export const geminiModel = genAI.getGenerativeModel({
   //model: 'gemini-2.5-flash',
-  //model: 'gemini-2.0-flash-lite',
+  model: 'gemini-2.5-flash-lite',
+  //model: 'gemini-2.5-pro',
   //model: 'gemini-2.0-flash',
-  model: 'gemini-3-flash-preview',
+  //model: 'gemini-3-flash-preview',
 })

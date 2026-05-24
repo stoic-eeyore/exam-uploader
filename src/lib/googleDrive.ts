@@ -309,3 +309,30 @@ export async function convertDriveDocxToPdfFile({
     }
   }
 }
+
+export async function organizeInDrive(
+  fileId: string,
+  oldFolderId: string,
+  year: string,
+  grade: string,
+  subject: string,
+  newFileName: string,
+) {
+  const parentFolderId = await getFolderPathIds({
+    year,
+    grade,
+    subject,
+  })
+
+  await drive.files.update({
+    fileId,
+    addParents: parentFolderId,
+    removeParents: oldFolderId,
+    supportsAllDrives: true,
+    fields: 'id, name, parents',
+
+    requestBody: {
+      name: newFileName,
+    },
+  })
+}

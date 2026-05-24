@@ -57,9 +57,6 @@ export async function POST(req: Request) {
       .map((g: any) => `- ID: ${g.id}, Name: "${g.name}"`)
       .join('\n')
 
-    console.log('Current Subjects in DB:\n', formattedSubjects)
-    console.log('Current Grades in DB:\n', formattedGrades)
-
     // Send to Gemini
     console.log('Sending request to Gemini here')
     const result = await geminiModel.generateContent([
@@ -76,8 +73,9 @@ export async function POST(req: Request) {
     Can you help determine the following:
     1. What is the subject (look for 'Mata Pelajaran' or similar) of the exam? (e.g. Math, Physics). And the corresponding subject ID.
     2. What is the grade (look for 'Kelas' or similar) of the exam? (e.g. Primary 1 to Primary 6, Secondary 1 to Secondary 6). And the corresponding grade ID.
+    Also, 'IV' corresponds to Primary 4, 'VII" corresponds to 'Secondary 1' and 'XI' corresponds to Secondary 5 and so on.
     3. What is the year (look for 'Tahun Ajaran' or similar) of the exam? (e.g. 2024/2026, 2024/2025, etc.)
-    4. What is the type of the exam? (e.g. Sumatif 1, Formatif 2, etc.)
+    4. What is the label of the exam? (Sumatif 1 to Sumatif 6, Formatif 1 toFormatif 6)
     5. The number of multiple choice questions and the number of essay questions in the exam.
 
     Here is the list of subjects: 
@@ -93,7 +91,7 @@ export async function POST(req: Request) {
       "gradeName": "string",
       "gradeId": "integer",
       "year": "string",
-      "type": "string",
+      "label": "string",
       "numberMultipleChoiceQuestions": "integer",
       "numberEssayQuestions": "integer",
     }

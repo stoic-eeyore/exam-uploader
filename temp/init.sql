@@ -28,3 +28,7 @@ VALUES
 
 INSERT INTO subjects (name, code, updated_at, created_at) VALUES ('Sejarah', 'SEJ', NOW(), NOW());
 INSERT INTO subjects (name, code, updated_at, created_at) VALUES ('Kimia', 'KIM', NOW(), NOW());
+
+UPDATE pending_exams
+SET drive_file_id = substring(drive_url from '\/d\/([a-zA-Z0-9_,-]+)')
+WHERE drive_url IS NOT NULL AND drive_file_id = '';

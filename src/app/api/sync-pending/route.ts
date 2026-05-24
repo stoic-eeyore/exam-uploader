@@ -12,11 +12,11 @@ export async function POST() {
 
     const files = await listDriveFiles(folderId)
     console.log(`Found ${files.length} files in Google Drive dropbox folder`)
-    console.log(folderId)
 
     let imported = 0
 
     for (const file of files) {
+      console.log(`Processing file: ${file.name} (${file.id})`)
       // Ignore temporary files
       if (file.name?.toLowerCase().startsWith('temp_')) {
         console.log(`Skipping temp file: ${file.name}`)
@@ -50,6 +50,7 @@ export async function POST() {
           mimeType: file.mimeType,
           filesize: Number(file.size || 0),
           driveUrl: file.webViewLink,
+          driveFileId: file.id,
           processed: false,
         },
       })

@@ -259,6 +259,7 @@ export interface Exam {
     | boolean
     | null;
   aiRawResponse?: string | null;
+  fileHash?: string | null;
   uploadedBy?: (number | null) | User;
   uploadedAt?: string | null;
   updatedAt: string;
@@ -274,6 +275,7 @@ export interface PendingExam {
   mimeType?: string | null;
   filesize?: number | null;
   driveUrl: string;
+  driveFileId: string;
   aiAnalysis?:
     | {
         [k: string]: unknown;
@@ -490,6 +492,7 @@ export interface ExamsSelect<T extends boolean = true> {
   filesize?: T;
   aiAnalysis?: T;
   aiRawResponse?: T;
+  fileHash?: T;
   uploadedBy?: T;
   uploadedAt?: T;
   updatedAt?: T;
@@ -504,6 +507,7 @@ export interface PendingExamsSelect<T extends boolean = true> {
   mimeType?: T;
   filesize?: T;
   driveUrl?: T;
+  driveFileId?: T;
   aiAnalysis?: T;
   processed?: T;
   uploadedBy?: T;

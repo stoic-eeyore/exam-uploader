@@ -2,45 +2,39 @@
 
 import { useSession, signOut } from 'next-auth/react'
 import { useEffect, useState, useRef } from 'react'
-import Link from 'next/link'
-
-type Exam = {
-  id: number
-  filename: string
-  processed: boolean
-  filesize?: number
-  uploadedAt?: string
-  title?: string
-  label?: string
-  driveUrl?: string | null
-  aiAnalysis?: string | null
-}
+import AnalysisEditorModal from '@/components/inbox/AnalysisEditorModal'
+import ReviewConvertModal from '@/components/inbox/ReviewConvertModal'
+import type { AIAnalysis, Exam } from '@/types/pendingExams'
 
 export default function InboxPage() {
   const { data: session, status } = useSession()
   const [loading, setLoading] = useState(true)
   const [recent, setRecent] = useState<Exam[]>([])
   const [analyzingId, setAnalyzingId] = useState<number | null>(null)
-  const [selectedAnalysis, setSelectedAnalysis] = useState<string | null>(null)
+  const [selectedAnalysis, setSelectedAnalysis] = useState<AIAnalysis | null>(null)
   const [syncing, setSyncing] = useState(false)
+  const [convertingId, setConvertingId] = useState<number | null>(null)
+  const [reviewExam, setReviewExam] = useState<Exam | null>(null)
+  const [editingExam, setEditingExam] = useState<Exam | null>(null)
+
+  const [search, setSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState<'all' | 'processed' | 'pending'>('all')
+
+  const fetchPendingExams = async () => {
+    try {
+      const res = await fetch('/api/pending-exams?sort=-updatedAt')
+      const data = await res.json()
+
+      setRecent(data.docs || [])
+    } catch (err) {
+      console.error('Failed to fetch pending exams:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
-    async function loadPage() {
-      try {
-        const res = await fetch('/api/pending-exams')
-        const data = await res.json()
-        console.log('Loaded dashboard data:', data.docs)
-        console.log('Loaded dashboard data:', data)
-
-        setRecent(data.docs)
-      } catch (err) {
-        console.error('Failed to load dashboard data:', err)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    loadPage()
+    fetchPendingExams()
   }, [])
 
   const handleSync = async (e: React.FormEvent) => {
@@ -49,11 +43,8 @@ export default function InboxPage() {
     try {
       const res = await fetch('/api/sync-pending', { method: 'POST' })
       if (res.ok) {
-        const dataRes = await fetch('/api/pending-exams')
-        const data = await dataRes.json()
-        setRecent(data.recent || [])
         console.log('Sync successful, updated inbox data')
-        console.log(data.recent)
+        await fetchPendingExams()
       }
     } catch (err) {
       console.error(err)
@@ -61,6 +52,19 @@ export default function InboxPage() {
       setSyncing(false)
     }
   }
+
+  const filteredExams = recent.filter((exam) => {
+    const matchesSearch = exam.filename.toLowerCase().includes(search.toLowerCase())
+
+    const matchesStatus =
+      statusFilter === 'all'
+        ? true
+        : statusFilter === 'processed'
+          ? exam.processed
+          : !exam.processed
+
+    return matchesSearch && matchesStatus
+  })
 
   return (
     <div className="min-h-screen bg-[#f9fafb] p-5 font-sans">
@@ -71,7 +75,7 @@ export default function InboxPage() {
             <div className="flex items-center gap-3">
               <h1 className="m-0 text-3xl font-bold text-[#111827]">Inbox</h1>
               <span className="bg-[#e0e7ff] text-[#4338ca] px-2 py-0.5 rounded-[6px] text-xs font-semibold">
-                {recent?.length || 0} Pending
+                {filteredExams?.length || 0} Documents
               </span>
             </div>
           </div>
@@ -93,6 +97,27 @@ export default function InboxPage() {
         {/* Main Table Card Wrapper */}
         <div className="bg-white rounded-lg p-[16px_20px] border border-[#e5e7eb] shadow-[0_1px_2px_rgba(0,0,0,0.05)]">
           <h3 className="mt-0 mb-4 text-base font-semibold text-[#374151]">Pending Exams</h3>
+
+          {/* Filters */}
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            <input
+              type="text"
+              placeholder="Search filename..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="border border-gray-200 rounded-md px-2.5 py-1 text-xs w-[180px]"
+            />
+
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as 'all' | 'processed' | 'pending')}
+              className="border border-gray-200 rounded-md px-2.5 py-1 text-xs bg-white"
+            >
+              <option value="all">All Status</option>
+              <option value="pending">Pending</option>
+              <option value="processed">Processed</option>
+            </select>
+          </div>
 
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
@@ -120,7 +145,7 @@ export default function InboxPage() {
               </thead>
 
               <tbody>
-                {recent?.map((item) => (
+                {filteredExams.map((item) => (
                   <tr key={item.id} className="border-b border-[#f3f4f6] align-middle">
                     <td className="py-3 text-sm text-[#374151]">
                       <strong className="font-bold">{item.filename}</strong>
@@ -146,9 +171,9 @@ export default function InboxPage() {
                       {item.aiAnalysis ? (
                         <button
                           onClick={() => {
-                            console.log('bakeko')
                             console.log(item.aiAnalysis)
-                            setSelectedAnalysis(item.aiAnalysis ?? null)
+                            setEditingExam(item)
+                            // setSelectedAnalysis(item.aiAnalysis ?? null)
                           }}
                           className="px-3 py-1.5 bg-[#f5f7ff] text-[#4f46e5] border border-[#e0e7ff] rounded-[20px] cursor-pointer font-semibold text-xs inline-flex items-center gap-1 transition-all duration-200 no-underline"
                         >
@@ -204,8 +229,18 @@ export default function InboxPage() {
                         >
                           View
                         </a>
-                        <button className="px-3 py-1 bg-transparent text-[#6b7280] border border-[#d1d5db] rounded-[6px] cursor-pointer text-xs transition hover:bg-gray-50">
-                          Convert
+
+                        <button
+                          // disabled={!item.aiAnalysis}
+                          className={`px-3 py-1 border rounded-[6px] text-xs transition ${
+                            // !item.aiAnalysis
+                            false
+                              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                              : 'bg-transparent text-[#6b7280] border-[#d1d5db] hover:bg-gray-50'
+                          }`}
+                          onClick={() => setReviewExam(item)}
+                        >
+                          Review & Convert
                         </button>
                       </div>
                     </td>
@@ -222,31 +257,26 @@ export default function InboxPage() {
             </div>
           )}
 
-          {/* Frosted Glass Analysis Modal */}
-          {selectedAnalysis && (
-            <div
-              className="fixed inset-0 bg-black/60 backdrop-blur-[4px] flex items-center justify-center z-50 p-5"
-              onClick={() => setSelectedAnalysis(null)}
-            >
-              <div
-                className="bg-white w-full max-w-[600px] max-h-[85vh] rounded-[16px] shadow-[0_20px_25px_-5px_rgba(0,0,0,0.1),0_10px_10px_-5px_rgba(0,0,0,0.04)] flex flex-col overflow-hidden animate-[fadeIn_0.2s_ease-out]"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className="p-[16px_24px] border-b border-[#f3f4f6] flex justify-between items-center bg-white">
-                  <h2 className="m-0 text-lg font-bold text-gray-900">AI Analysis Results</h2>
-                  <button
-                    onClick={() => setSelectedAnalysis(null)}
-                    className="bg-[#f3f4f6] border-none rounded-full w-8 h-8 flex items-center justify-center cursor-pointer text-[#6b7280] text-xl transition-colors duration-200 hover:bg-gray-200"
-                  >
-                    ✕
-                  </button>
-                </div>
-                <div className="p-6 overflow-y-auto text-sm leading-[1.6] text-[#374151] bg-[#fdfdfd] font-mono whitespace-pre-wrap">
-                  {JSON.stringify(selectedAnalysis, null, 2)}
-                </div>
-              </div>
-            </div>
-          )}
+          <AnalysisEditorModal
+            exam={editingExam}
+            open={!!editingExam}
+            onClose={() => setEditingExam(null)}
+            onSaved={(updatedExam) => {
+              setRecent((prev) =>
+                prev.map((exam) => (exam.id === updatedExam.id ? updatedExam : exam)),
+              )
+            }}
+          />
+
+          <ReviewConvertModal
+            exam={reviewExam}
+            converting={convertingId === reviewExam?.id}
+            onClose={() => setReviewExam(null)}
+            setConvertingId={setConvertingId}
+            onConverted={(examId) => {
+              setRecent((prev) => prev.filter((x) => x.id !== examId))
+            }}
+          />
         </div>
       </div>
     </div>
