@@ -82,6 +82,7 @@ export async function POST(req: NextRequest) {
         grade,
         subject,
         driveUrl: pendingExam.driveUrl,
+        fileHash: pendingExam.fileHash,
       },
     })
 

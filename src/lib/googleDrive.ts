@@ -210,7 +210,7 @@ export async function downloadDriveFile(
 export async function listDriveFiles(folderId: string) {
   const response = await drive.files.list({
     q: `'${folderId}' in parents and trashed=false`,
-    fields: 'files(id, name, mimeType, size, webViewLink)',
+    fields: 'files(id, name, mimeType, size, webViewLink, md5Checksum)',
     pageSize: 100,
     supportsAllDrives: true,
     includeItemsFromAllDrives: true,

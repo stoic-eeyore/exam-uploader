@@ -51,6 +51,7 @@ export async function POST() {
           filesize: Number(file.size || 0),
           driveUrl: file.webViewLink,
           driveFileId: file.id,
+          fileHash: file.md5Checksum || null,
           processed: false,
         },
       })
