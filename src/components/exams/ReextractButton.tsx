@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 
-export default function ReextractButton({ questionId }: { questionId: string }) {
+export default function ReextractButton({ questionId }: { questionId: number }) {
   const [instructions, setInstructions] = useState('')
 
   async function handleSubmit() {
