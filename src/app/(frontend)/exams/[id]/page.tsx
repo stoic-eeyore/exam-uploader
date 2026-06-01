@@ -44,7 +44,7 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
         <p>{exam.filename}</p>
       </div>
 
-      {exam.processingStatus === 'uploaded' || <ExtractButton examId={String(exam.id)} />}
+      {exam.processingStatus === 'uploaded' && <ExtractButton examId={exam.id} />}
 
       <div className="grid grid-cols-3 gap-4">
         <div className="rounded border p-4">

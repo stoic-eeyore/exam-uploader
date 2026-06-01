@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
-export default function ExtractButton({ examId }: { examId: string }) {
+export default function ExtractButton({ examId }: { examId: number }) {
   const [loading, setLoading] = useState(false)
 
   const router = useRouter()
