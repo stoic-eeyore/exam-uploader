@@ -265,6 +265,7 @@ export interface Exam {
   fileHash?: string | null;
   processingStatus?: ('uploaded' | 'extracting' | 'review' | 'completed' | 'failed') | null;
   processingError?: string | null;
+  reviewedByAI?: boolean | null;
   uploadedBy?: (number | null) | User;
   uploadedAt?: string | null;
   updatedAt: string;
@@ -341,6 +342,15 @@ export interface Question {
     | null;
   suggestedInstructions?: string | null;
   editedByHuman?: boolean | null;
+  qualityIssues?:
+    | {
+        issue?: string | null;
+        severity?: ('low' | 'medium' | 'high') | null;
+        id?: string | null;
+      }[]
+    | null;
+  cognitiveLevel?: ('recall' | 'understanding' | 'hots') | null;
+  reviewedByAI?: boolean | null;
   status?: ('draft' | 'verified') | null;
   updatedAt: string;
   createdAt: string;
@@ -540,6 +550,7 @@ export interface ExamsSelect<T extends boolean = true> {
   fileHash?: T;
   processingStatus?: T;
   processingError?: T;
+  reviewedByAI?: T;
   uploadedBy?: T;
   uploadedAt?: T;
   updatedAt?: T;
@@ -605,6 +616,15 @@ export interface QuestionsSelect<T extends boolean = true> {
       };
   suggestedInstructions?: T;
   editedByHuman?: T;
+  qualityIssues?:
+    | T
+    | {
+        issue?: T;
+        severity?: T;
+        id?: T;
+      };
+  cognitiveLevel?: T;
+  reviewedByAI?: T;
   status?: T;
   updatedAt?: T;
   createdAt?: T;

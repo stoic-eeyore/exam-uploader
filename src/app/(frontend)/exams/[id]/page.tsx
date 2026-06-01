@@ -8,6 +8,7 @@ import remarkGfm from 'remark-gfm'
 import rehypeKatex from 'rehype-katex'
 import ReviewSuggestionModal from '@/components/questions/ReviewSuggestionModal'
 import EditQuestionModal from '@/components/questions/EditQuestionModal'
+import ReviewQuestionsButton from '@/components/exams/ReviewQuestionsButton'
 
 export default async function ExamPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -45,6 +46,7 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
       </div>
 
       {exam.processingStatus === 'uploaded' && <ExtractButton examId={exam.id} />}
+      {!exam.reviewedByAI && <ReviewQuestionsButton examId={exam.id} />}
 
       <div className="grid grid-cols-3 gap-4">
         <div className="rounded border p-4">
@@ -72,52 +74,83 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
       </div>
 
       <div className="space-y-4">
-        {questions.docs.map((question) => (
-          <div key={question.id} className="rounded border p-4 shadow-sm bg-white space-y-3">
-            <ReextractButton questionId={question.id} />
-            <div className="flex items-start gap-3">
-              <span className="font-bold text-gray-900 min-w-[2.5rem]">
-                Q{question.questionNumber}
-              </span>
+        {questions.docs.map((question) => {
+          const qualityIssues = question.qualityIssues ?? []
 
-              <div className="text-gray-800 flex-1 prose max-w-none">
-                <ReactMarkdown
-                  remarkPlugins={[remarkMath, remarkGfm]}
-                  rehypePlugins={[rehypeKatex]}
-                >
-                  {question.questionText}
-                </ReactMarkdown>
-              </div>
-            </div>
+          return (
+            <div key={question.id} className="rounded border p-4 shadow-sm bg-white space-y-3">
+              <ReextractButton questionId={question.id} />
 
-            {/* 2. Display Choices/Options for MCQ Questions */}
-            {question.questionType === 'mcq' && question.options && (
-              <div className="pl-[3.25rem] grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {(question.options || []).map((option: any, index: number) => {
-                  // Automatically generate matching lettering labels (A, B, C, D)
-                  const choiceLetter = String.fromCharCode(65 + index)
+              <div className="flex items-start gap-3">
+                <span className="font-bold text-gray-900 min-w-[2.5rem]">
+                  Q{question.questionNumber}
+                </span>
 
-                  return (
-                    <div
-                      key={option.id || index}
-                      className="flex items-start gap-2 text-sm text-gray-600 border rounded-md p-2 bg-gray-50/50"
-                    >
-                      <span className="font-bold text-gray-400">{choiceLetter}.</span>
-                      <div className="flex-1 prose max-w-none text-sm">
-                        <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
-                          {option.text}
-                        </ReactMarkdown>
-                      </div>
+                <div className="flex-1">
+                  <div className="mb-2 flex flex-wrap items-center gap-2">
+                    {question.cognitiveLevel && (
+                      <span className="rounded bg-blue-100 px-2 py-1 text-xs">
+                        {question.cognitiveLevel}
+                      </span>
+                    )}
+
+                    {qualityIssues.length > 0 && (
+                      <span className="rounded bg-red-100 px-2 py-1 text-xs text-red-700">
+                        {qualityIssues.length} issue(s)
+                      </span>
+                    )}
+                  </div>
+
+                  {qualityIssues.length > 0 && (
+                    <div className="mb-3 space-y-1">
+                      {qualityIssues.map((issue: any, index: number) => (
+                        <div key={index} className="text-sm text-red-600">
+                          ⚠ {issue.issue}
+                        </div>
+                      ))}
                     </div>
-                  )
-                })}
+                  )}
 
-                {question.suggestedQuestionText && <ReviewSuggestionModal question={question} />}
-                <EditQuestionModal question={question} />
+                  <div className="prose max-w-none text-gray-800">
+                    <ReactMarkdown
+                      remarkPlugins={[remarkMath, remarkGfm]}
+                      rehypePlugins={[rehypeKatex]}
+                    >
+                      {question.questionText}
+                    </ReactMarkdown>
+                  </div>
+                </div>
               </div>
-            )}
-          </div>
-        ))}
+
+              {question.questionType === 'mcq' && question.options && (
+                <div className="grid grid-cols-1 gap-2 pl-[3.25rem] sm:grid-cols-2">
+                  {question.options.map((option: any, index: number) => {
+                    const choiceLetter = String.fromCharCode(65 + index)
+
+                    return (
+                      <div
+                        key={option.id || index}
+                        className="flex items-start gap-2 rounded-md border bg-gray-50/50 p-2 text-sm text-gray-600"
+                      >
+                        <span className="font-bold text-gray-400">{choiceLetter}.</span>
+
+                        <div className="flex-1 prose max-w-none text-sm">
+                          <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+                            {option.text}
+                          </ReactMarkdown>
+                        </div>
+                      </div>
+                    )
+                  })}
+
+                  {question.suggestedQuestionText && <ReviewSuggestionModal question={question} />}
+
+                  <EditQuestionModal question={question} />
+                </div>
+              )}
+            </div>
+          )
+        })}
       </div>
     </div>
   )

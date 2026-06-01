@@ -113,6 +113,47 @@ export const Questions: CollectionConfig = {
     },
 
     {
+      name: 'qualityIssues',
+      type: 'array',
+      fields: [
+        {
+          name: 'issue',
+          type: 'text',
+        },
+        {
+          name: 'severity',
+          type: 'select',
+          options: ['low', 'medium', 'high'],
+        },
+      ],
+    },
+
+    {
+      name: 'cognitiveLevel',
+      type: 'select',
+      options: [
+        {
+          label: 'Recall',
+          value: 'recall',
+        },
+        {
+          label: 'Understanding',
+          value: 'understanding',
+        },
+        {
+          label: 'HOTS',
+          value: 'hots',
+        },
+      ],
+    },
+
+    {
+      name: 'reviewedByAI',
+      type: 'checkbox',
+      defaultValue: false,
+    },
+
+    {
       name: 'status',
       type: 'select',
       defaultValue: 'draft',

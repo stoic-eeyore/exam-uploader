@@ -140,6 +140,12 @@ export const Exams: CollectionConfig = {
     },
 
     {
+      name: 'reviewedByAI',
+      type: 'checkbox',
+      defaultValue: false,
+    },
+
+    {
       name: 'uploadedBy',
       type: 'relationship',
       relationTo: 'users',
