@@ -182,18 +182,26 @@ export default function DashboardPage() {
                       </td>
                     )}
                     <td className="py-3 text-[13px] text-right font-semibold text-gray-700">
-                      {exam.driveUrl ? (
-                        <a
-                          href={exam.driveUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          //className="text-[#2563eb] hover:text-[#1d4ed8] hover:underline transition-colors duration-150"
+                      <div className="flex items-center justify-end gap-3">
+                        {exam.driveUrl ? (
+                          <a
+                            href={exam.driveUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-[#2563eb] hover:text-[#1d4ed8] hover:underline transition-colors duration-150"
+                          >
+                            View
+                          </a>
+                        ) : (
+                          '-'
+                        )}
+                        <Link
+                          href={`/exams/${exam.id}`}
+                          className="text-[#2563eb] hover:text-[#1d4ed8] hover:underline transition-colors duration-150"
                         >
-                          View
-                        </a>
-                      ) : (
-                        '-'
-                      )}
+                          Details
+                        </Link>
+                      </div>
                     </td>
                   </tr>
                 ))}

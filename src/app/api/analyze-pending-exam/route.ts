@@ -5,6 +5,7 @@ import { genAI, geminiModel } from '@/lib/gemini'
 import { getPayloadClient } from '@/lib/payload'
 import { downloadDriveFile } from '@/lib/googleDrive'
 import { getActiveGeminiFile, uploadFileToGemini } from '@/lib/geminiFiles'
+import { extractJson } from '@/utils/json'
 
 export async function POST(req: Request) {
   try {
@@ -124,11 +125,4 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ error: 'Failed to analyze exam' }, { status: 500 })
   }
-}
-
-function extractJson(text: string) {
-  return text
-    .replace(/```json/g, '')
-    .replace(/```/g, '')
-    .trim()
 }

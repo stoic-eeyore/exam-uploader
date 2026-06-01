@@ -75,6 +75,7 @@ export interface Config {
     exams: Exam;
     'pending-exams': PendingExam;
     'gemini-mappings': GeminiMapping;
+    questions: Question;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -90,6 +91,7 @@ export interface Config {
     exams: ExamsSelect<false> | ExamsSelect<true>;
     'pending-exams': PendingExamsSelect<false> | PendingExamsSelect<true>;
     'gemini-mappings': GeminiMappingsSelect<false> | GeminiMappingsSelect<true>;
+    questions: QuestionsSelect<false> | QuestionsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -246,6 +248,7 @@ export interface Exam {
     [k: string]: unknown;
   } | null;
   driveUrl?: string | null;
+  driveFileId?: string | null;
   filename?: string | null;
   mimeType?: string | null;
   filesize?: number | null;
@@ -260,6 +263,8 @@ export interface Exam {
     | null;
   aiRawResponse?: string | null;
   fileHash?: string | null;
+  processingStatus?: ('uploaded' | 'extracting' | 'review' | 'completed' | 'failed') | null;
+  processingError?: string | null;
   uploadedBy?: (number | null) | User;
   uploadedAt?: string | null;
   updatedAt: string;
@@ -303,6 +308,40 @@ export interface GeminiMapping {
   geminiFileName: string;
   geminiFileUri: string;
   geminiExpiresAt: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "questions".
+ */
+export interface Question {
+  id: number;
+  exam: number | Exam;
+  questionNumber: number;
+  questionType?: ('mcq' | 'essay') | null;
+  questionText?: string | null;
+  options?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  answer?: string | null;
+  explanation?: string | null;
+  extractionConfidence?: number | null;
+  aiRawResponse?: string | null;
+  suggestedQuestionText?: string | null;
+  suggestedQuestionType?: ('mcq' | 'essay') | null;
+  suggestedOptions?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  suggestedInstructions?: string | null;
+  editedByHuman?: boolean | null;
+  status?: ('draft' | 'verified') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -361,6 +400,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'gemini-mappings';
         value: number | GeminiMapping;
+      } | null)
+    | ({
+        relationTo: 'questions';
+        value: number | Question;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -488,12 +531,15 @@ export interface ExamsSelect<T extends boolean = true> {
   year?: T;
   description?: T;
   driveUrl?: T;
+  driveFileId?: T;
   filename?: T;
   mimeType?: T;
   filesize?: T;
   aiAnalysis?: T;
   aiRawResponse?: T;
   fileHash?: T;
+  processingStatus?: T;
+  processingError?: T;
   uploadedBy?: T;
   uploadedAt?: T;
   updatedAt?: T;
@@ -527,6 +573,39 @@ export interface GeminiMappingsSelect<T extends boolean = true> {
   geminiFileName?: T;
   geminiFileUri?: T;
   geminiExpiresAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "questions_select".
+ */
+export interface QuestionsSelect<T extends boolean = true> {
+  exam?: T;
+  questionNumber?: T;
+  questionType?: T;
+  questionText?: T;
+  options?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  answer?: T;
+  explanation?: T;
+  extractionConfidence?: T;
+  aiRawResponse?: T;
+  suggestedQuestionText?: T;
+  suggestedQuestionType?: T;
+  suggestedOptions?:
+    | T
+    | {
+        text?: T;
+        id?: T;
+      };
+  suggestedInstructions?: T;
+  editedByHuman?: T;
+  status?: T;
   updatedAt?: T;
   createdAt?: T;
 }

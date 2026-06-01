@@ -82,6 +82,13 @@ export const Exams: CollectionConfig = {
     },
 
     {
+      name: 'driveFileId',
+      type: 'text',
+      // required: true,
+      defaultValue: '',
+    },
+
+    {
       name: 'filename',
       type: 'text',
     },
@@ -115,6 +122,24 @@ export const Exams: CollectionConfig = {
     },
 
     {
+      name: 'processingStatus',
+      type: 'select',
+      defaultValue: 'uploaded',
+      options: [
+        { label: 'Uploaded', value: 'uploaded' },
+        { label: 'Extracting', value: 'extracting' },
+        { label: 'Review', value: 'review' },
+        { label: 'Completed', value: 'completed' },
+        { label: 'Failed', value: 'failed' },
+      ],
+    },
+
+    {
+      name: 'processingError',
+      type: 'textarea',
+    },
+
+    {
       name: 'uploadedBy',
       type: 'relationship',
       relationTo: 'users',
@@ -135,15 +160,12 @@ export const Exams: CollectionConfig = {
   hooks: {
     beforeChange: [
       async ({ data, req }) => {
-        console.log('in before change')
         // ✅ Auto-set metadata
         if (req.user) {
           data.uploadedBy = req.user.id
         }
         data.uploadedAt = new Date()
 
-        console.log('generating title')
-        console.dir(data)
         // ✅ Auto-generate title if missing
         if (!data.title && data.grade && data.subject && data.label) {
           const [gradeDoc, subjectDoc] = await Promise.all([

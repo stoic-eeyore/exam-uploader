@@ -14,6 +14,7 @@ import { GeminiMappings } from './collections/GeminiMappings'
 import { Grades } from './collections/Grades'
 import { Subjects } from './collections/Subjects'
 import { Labels } from './collections/Labels'
+import { Questions } from './collections/Questions'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -25,7 +26,17 @@ export default buildConfig({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Users, Media, Grades, Subjects, Labels, Exams, PendingExams, GeminiMappings],
+  collections: [
+    Users,
+    Media,
+    Grades,
+    Subjects,
+    Labels,
+    Exams,
+    PendingExams,
+    GeminiMappings,
+    Questions,
+  ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
