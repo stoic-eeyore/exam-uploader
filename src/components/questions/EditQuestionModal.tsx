@@ -4,6 +4,7 @@ import { useState } from 'react'
 
 export default function EditQuestionModal({ question }: { question: any }) {
   const [open, setOpen] = useState(false)
+  const [options, setOptions] = useState(question.options || [])
 
   const [questionText, setQuestionText] = useState(question.questionText)
 
@@ -18,7 +19,7 @@ export default function EditQuestionModal({ question }: { question: any }) {
       body: JSON.stringify({
         questionText,
         questionType,
-        options: question.options || [],
+        options,
       }),
     })
 
@@ -60,6 +61,63 @@ export default function EditQuestionModal({ question }: { question: any }) {
                   className="border rounded p-2 w-full"
                 />
               </div>
+
+              {questionType === 'mcq' && (
+                <div>
+                  <label className="block mb-2 font-medium">Options</label>
+
+                  <div className="space-y-3">
+                    {options.map((option: any, index: number) => (
+                      <div key={index} className="flex gap-2 items-start">
+                        <div className="w-8 pt-2 font-bold">{String.fromCharCode(65 + index)}</div>
+
+                        <textarea
+                          value={option.text}
+                          onChange={(e) => {
+                            const updated = [...options]
+
+                            updated[index] = {
+                              ...updated[index],
+                              text: e.target.value,
+                            }
+
+                            setOptions(updated)
+                          }}
+                          rows={3}
+                          className="border rounded p-2 flex-1"
+                        />
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const updated = options.filter((_: any, i: number) => i !== index)
+
+                            setOptions(updated)
+                          }}
+                          className="px-3 py-2 border rounded text-red-600"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <button
+                type="button"
+                onClick={() =>
+                  setOptions([
+                    ...options,
+                    {
+                      text: '',
+                    },
+                  ])
+                }
+                className="mt-3 rounded border px-3 py-2"
+              >
+                Add Option
+              </button>
             </div>
 
             <div className="mt-6 flex gap-2">
