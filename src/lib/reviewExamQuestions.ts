@@ -74,7 +74,7 @@ Return ONLY JSON.
     {
       "questionNumber": 1,
       "questionType": "mcq", // value must be "mcq" or "essay"
-      "cognitiveLevel": "recall",
+      "cognitiveLevel": "recall", // value must only be "recall", "understanding" or "hots"
       "issues": [
         {
           "issue": "Grammar issue",
