@@ -3,7 +3,7 @@ export function extractJson(text: string) {
     text
       .replace(/```json/g, '')
       .replace(/```/g, '')
-      //    .replace(/(?<!\\)\\(?!["\\\/bfnrtu])/g, '\\\\')
+      //.replace(/(?<!\\)\\(?!["\\\/bfnrtu])/g, '\\\\')
       .trim()
   )
 }
