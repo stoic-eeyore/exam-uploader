@@ -131,6 +131,7 @@ export async function downloadDriveFile(
     throw new Error('Invalid Drive URL')
   }
 
+  console.log("Retrieving meta-data")
   // 1. Fetch metadata to determine if the file is a Word document
   const metadata = await drive.files.get({
     fileId,
@@ -190,11 +191,13 @@ export async function downloadDriveFile(
   }
 
   // 2. Standard Workflow: Download native PDFs normally
+  console.log("downloading pdf")
   const response = await drive.files.get(
     {
       fileId,
       alt: 'media',
       supportsAllDrives: true,
+      acknowledgeAbuse: true,
     },
     {
       responseType: 'arraybuffer',
