@@ -3,7 +3,7 @@ import { google } from 'googleapis'
 
 import { geminiModel } from '@/lib/gemini'
 import { getPayloadClient } from '@/lib/payload'
-import { downloadDriveFile } from '@/lib/googleDrive'
+import { getDriveFileAsPdf } from '@/lib/googleDrive'
 import { uploadFileToGemini } from '@/lib/geminiFiles'
 
 export async function POST(req: Request) {
@@ -28,7 +28,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Exam has no driveUrl' }, { status: 400 })
     }
 
-    const downloadResult = await downloadDriveFile(exam.driveUrl)
+    const downloadResult = await getDriveFileAsPdf(exam.driveUrl)
 
     console.log('uploading file to Gemini')
     const uploadedFile = await uploadFileToGemini({

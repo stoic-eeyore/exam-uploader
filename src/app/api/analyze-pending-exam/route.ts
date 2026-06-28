@@ -3,7 +3,7 @@ import { google } from 'googleapis'
 
 import { genAI, geminiModel } from '@/lib/gemini'
 import { getPayloadClient } from '@/lib/payload'
-import { downloadDriveFile } from '@/lib/googleDrive'
+import { getDriveFileAsPdf } from '@/lib/googleDrive'
 import { getActiveGeminiFile, uploadFileToGemini } from '@/lib/geminiFiles'
 import { extractJson } from '@/utils/json'
 

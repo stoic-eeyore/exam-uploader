@@ -123,76 +123,35 @@ export function extractDriveFileId(url: string) {
   return match?.[1]
 }
 
-export async function downloadDriveFile(
-  driveUrl: string,
-): Promise<{ buffer: Buffer; mimeType: string }> {
-  const fileId = extractDriveFileId(driveUrl)
-  if (!fileId) {
-    throw new Error('Invalid Drive URL')
-  }
+function decodeGoogleError(err: any) {
+  if (!err.response) return err
 
-  console.log("Retrieving meta-data")
-  // 1. Fetch metadata to determine if the file is a Word document
-  const metadata = await drive.files.get({
-    fileId,
-    fields: 'mimeType, name',
-    supportsAllDrives: true,
-  })
+  let body = err.response.data
 
-  const currentMimeType = metadata.data.mimeType
-
-  // 🔍 Intercept step: If it's a DOCX file, convert it to a PDF on-the-fly
-  if (
-    currentMimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-  ) {
-    let tempGoogleDocId: string | null = null
-
+  if (Buffer.isBuffer(body)) {
     try {
-      // Step A: Copy and translate the .docx into a temporary Google Doc
-      const docCopy = await drive.files.copy({
-        fileId: fileId,
-        requestBody: {
-          name: `Temp_Conv_${Date.now()}`,
-          mimeType: 'application/vnd.google-apps.document',
-        },
-        supportsAllDrives: true,
-        fields: 'id',
-      })
-
-      tempGoogleDocId = docCopy.data.id || null
-      if (!tempGoogleDocId) throw new Error('Google Doc translation failed')
-
-      // Step B: Export that temporary Google Doc as a PDF binary stream
-      const pdfExport = await drive.files.export(
-        {
-          fileId: tempGoogleDocId,
-          mimeType: 'application/pdf',
-        },
-        {
-          responseType: 'arraybuffer',
-        },
-      )
-
-      return {
-        buffer: Buffer.from(pdfExport.data as ArrayBuffer),
-        mimeType: 'application/pdf', // Explicitly override the returned mimeType
-      }
-    } finally {
-      // Step C: Cleanup - trash the temporary Google Doc right away
-      if (tempGoogleDocId) {
-        await drive.files
-          .delete({
-            fileId: tempGoogleDocId,
-            supportsAllDrives: true,
-          })
-          .catch((err) => console.error('Failed to clean temp doc:', err))
-      }
+      body = JSON.parse(body.toString())
+    } catch {
+      body = body.toString()
     }
   }
 
-  // 2. Standard Workflow: Download native PDFs normally
-  console.log("downloading pdf")
-  const response = await drive.files.get(
+  console.error('Google Drive error:')
+  console.dir(body, { depth: null })
+
+  return err
+}
+
+const MIME = {
+  PDF: 'application/pdf',
+
+  DOCX: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+
+  GOOGLE_DOC: 'application/vnd.google-apps.document',
+} as const
+
+async function downloadBinary(fileId: string) {
+  const { data } = await drive.files.get(
     {
       fileId,
       alt: 'media',
@@ -204,9 +163,90 @@ export async function downloadDriveFile(
     },
   )
 
-  return {
-    buffer: Buffer.from(response.data as ArrayBuffer),
-    mimeType: currentMimeType || 'application/pdf',
+  return Buffer.from(data as ArrayBuffer)
+}
+
+async function exportGoogleDocAsPdf(fileId: string) {
+  const { data } = await drive.files.export(
+    {
+      fileId,
+      mimeType: MIME.PDF,
+    },
+    {
+      responseType: 'arraybuffer',
+    },
+  )
+
+  return Buffer.from(data as ArrayBuffer)
+}
+
+async function convertDocxToPdf(fileId: string) {
+  let tempId: string | null = null
+
+  try {
+    const copy = await drive.files.copy({
+      fileId,
+      requestBody: {
+        mimeType: MIME.GOOGLE_DOC,
+        name: `Temp_${Date.now()}`,
+      },
+      supportsAllDrives: true,
+      fields: 'id',
+    })
+
+    tempId = copy.data.id!
+
+    return await exportGoogleDocAsPdf(tempId)
+  } finally {
+    if (tempId) {
+      await drive.files
+        .delete({
+          fileId: tempId,
+          supportsAllDrives: true,
+        })
+        .catch(console.error)
+    }
+  }
+}
+
+export async function getDriveFileAsPdf(
+  driveUrl: string,
+): Promise<{ buffer: Buffer; mimeType: string }> {
+  const fileId = extractDriveFileId(driveUrl)
+  if (!fileId) {
+    throw new Error('Invalid Drive URL')
+  }
+
+  const metadata = await drive.files.get({
+    fileId,
+    fields: 'mimeType,name',
+    supportsAllDrives: true,
+  })
+
+  const mimeType = metadata.data.mimeType
+
+  console.log(`Drive file ${fileId}`)
+  console.log(`Mime type: ${mimeType}`)
+  console.log(`Name: ${metadata.data.name}`)
+
+  switch (mimeType) {
+    case MIME.GOOGLE_DOC:
+      return {
+        buffer: await exportGoogleDocAsPdf(fileId),
+        mimeType: MIME.PDF,
+      }
+
+    case MIME.DOCX:
+      return {
+        buffer: await convertDocxToPdf(fileId),
+        mimeType: MIME.PDF,
+      }
+
+    default:
+      return {
+        buffer: await downloadBinary(fileId),
+        mimeType: mimeType ?? 'application/octet-stream',
+      }
   }
 }
 

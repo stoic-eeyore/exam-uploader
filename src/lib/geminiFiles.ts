@@ -1,5 +1,5 @@
 import { BasePayload } from 'payload'
-import { downloadDriveFile } from '@/lib/googleDrive'
+import { getDriveFileAsPdf } from '@/lib/googleDrive'
 
 interface GetActiveFileParams {
   payload: BasePayload
@@ -83,7 +83,7 @@ export async function getActiveGeminiFile({
 
   console.log('No active Gemini file mapping found. Uploading new file to Gemini.')
   // ❌ Cache Miss: Execute the lazy buffer-fetching callback function passed into the helper
-  const downloadResult = await downloadDriveFile(driveUrl)
+  const downloadResult = await getDriveFileAsPdf(driveUrl)
 
   // Swap the extension name out for your Gemini file registration name if it was converted
   const finalFilename = filename.replace(/\.docx$/i, '.pdf')
