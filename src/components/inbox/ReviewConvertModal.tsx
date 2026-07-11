@@ -14,8 +14,8 @@ type Props = {
 
 // Generate a list of academic years (e.g., ["2023/2024", "2024/2025", "2025/2026", "2026/2027"])
 const currentYear = new Date().getFullYear()
-const ACADEMIC_YEARS = Array.from({ length: 5 }, (_, i) => {
-  const start = currentYear - 2 + i
+const ACADEMIC_YEARS = Array.from({ length: 6 }, (_, i) => {
+  const start = currentYear - i
   return `${start}/${start + 1}`
 })
 
