@@ -57,7 +57,18 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
         <div className="flex items-start justify-between gap-4">
           <div>
             <h1 className="text-2xl font-bold">{exam.title}</h1>
-            <p className="text-sm text-gray-500 mt-0.5">{exam.filename}</p>
+            <div className="flex items-center gap-2 mt-1.5">
+              <span className="text-sm text-gray-500">
+                {(exam.grade as any)?.name || exam.grade}
+              </span>
+              <span className="text-gray-300">·</span>
+              <span className="text-sm text-gray-500">
+                {(exam.subject as any)?.name || exam.subject}
+              </span>
+              <span className="text-gray-300">·</span>
+              <span className="text-sm text-gray-500">{exam.year}</span>
+            </div>
+            <p className="text-xs text-gray-400 mt-0.5">{exam.filename}</p>
           </div>
 
           <div className="flex items-center gap-2 flex-shrink-0">
