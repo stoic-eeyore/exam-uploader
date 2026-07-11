@@ -12,6 +12,13 @@ type Props = {
   setConvertingId: (id: number | null) => void
 }
 
+// Generate a list of academic years (e.g., ["2023/2024", "2024/2025", "2025/2026", "2026/2027"])
+const currentYear = new Date().getFullYear()
+const ACADEMIC_YEARS = Array.from({ length: 5 }, (_, i) => {
+  const start = currentYear - 2 + i
+  return `${start}/${start + 1}`
+})
+
 export default function ReviewConvertModal({
   exam,
   converting,
@@ -120,7 +127,7 @@ export default function ReviewConvertModal({
           <div>
             <label className="block text-sm font-medium mb-1">Year</label>
 
-            <input
+            <select
               value={form.year}
               onChange={(e) =>
                 setForm((prev) => ({
@@ -129,7 +136,14 @@ export default function ReviewConvertModal({
                 }))
               }
               className="w-full border rounded-lg px-3 py-2"
-            />
+            >
+              <option value="">Select year</option>
+              {ACADEMIC_YEARS.map((year) => (
+                <option key={year} value={year}>
+                  {year}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
 
