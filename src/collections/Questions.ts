@@ -3,6 +3,32 @@ import { CollectionConfig } from 'payload'
 export const Questions: CollectionConfig = {
   slug: 'questions',
 
+  hooks: {
+    beforeChange: [
+      async ({ data, req, operation, originalDoc }) => {
+        if (operation !== 'update') return data
+
+        const wasVerified = originalDoc?.status === 'verified'
+        const isNowVerified = data.status === 'verified'
+        const isNowDraft = data.status === 'draft'
+
+        // Just got verified
+        if (!wasVerified && isNowVerified) {
+          data.verifiedBy = req.user?.id || null
+          data.verifiedAt = new Date().toISOString()
+        }
+
+        // Just got un-verified
+        if (wasVerified && isNowDraft) {
+          data.verifiedBy = null
+          data.verifiedAt = null
+        }
+
+        return data
+      },
+    ],
+  },
+
   fields: [
     {
       name: 'exam',
@@ -167,6 +193,26 @@ export const Questions: CollectionConfig = {
           value: 'verified',
         },
       ],
+    },
+
+    {
+      name: 'verifiedBy',
+      type: 'relationship',
+      relationTo: 'users',
+      admin: {
+        readOnly: true,
+      },
+    },
+
+    {
+      name: 'verifiedAt',
+      type: 'date',
+      admin: {
+        readOnly: true,
+        date: {
+          pickerAppearance: 'dayAndTime',
+        },
+      },
     },
   ],
 }

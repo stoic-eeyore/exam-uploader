@@ -352,6 +352,8 @@ export interface Question {
   cognitiveLevel?: ('recall' | 'understanding' | 'hots') | null;
   reviewedByAI?: boolean | null;
   status?: ('draft' | 'verified') | null;
+  verifiedBy?: (number | null) | User;
+  verifiedAt?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -626,6 +628,8 @@ export interface QuestionsSelect<T extends boolean = true> {
   cognitiveLevel?: T;
   reviewedByAI?: T;
   status?: T;
+  verifiedBy?: T;
+  verifiedAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }

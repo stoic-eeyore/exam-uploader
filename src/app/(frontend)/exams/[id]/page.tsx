@@ -9,6 +9,7 @@ import rehypeKatex from 'rehype-katex'
 import ReviewSuggestionModal from '@/components/questions/ReviewSuggestionModal'
 import EditQuestionModal from '@/components/questions/EditQuestionModal'
 import ReviewQuestionsButton from '@/components/exams/ReviewQuestionsButton'
+import VerifyButton from '@/components/questions/VerifyButton'
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
 
@@ -90,11 +91,15 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
       <div className="space-y-6">
         {questions.docs.map((question) => {
           const qualityIssues = question.qualityIssues ?? []
+          const isVerified = question.status === 'verified'
 
           return (
-            <div key={question.id} className="rounded border p-4 shadow-sm bg-white space-y-3">
-              <ReextractButton questionId={question.id} />
-
+            <div
+              key={question.id}
+              className={`rounded-lg border p-4 shadow-sm bg-white space-y-3 ${
+                isVerified ? 'border-l-4 border-l-emerald-500' : 'border-l-4 border-l-transparent'
+              }`}
+            >
               <div className="flex items-start gap-3">
                 <span className="font-bold text-gray-900 min-w-[2.5rem] text-sm">
                   Q{question.questionNumber}
@@ -105,6 +110,24 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
                     {question.cognitiveLevel && (
                       <span className="rounded bg-blue-100 px-2 py-1 text-xs">
                         {question.cognitiveLevel}
+                      </span>
+                    )}
+
+                    {isVerified && (
+                      <span className="rounded bg-emerald-100 px-2 py-1 text-xs text-emerald-700 font-medium inline-flex items-center gap-1">
+                        <svg
+                          width="12"
+                          height="12"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="3"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                        Verified
                       </span>
                     )}
 
@@ -156,12 +179,22 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
                       </div>
                     )
                   })}
-
-                  {question.suggestedQuestionText && <ReviewSuggestionModal question={question} />}
-
-                  <EditQuestionModal question={question} />
                 </div>
               )}
+
+              {/* Action Toolbar */}
+              {/* Action Toolbar */}
+              <div className="flex items-center pl-[3.25rem] pt-2 border-t border-gray-100">
+                <div className="inline-flex rounded-md border border-gray-200">
+                  <VerifyButton question={question} />
+                  <div className="w-px bg-gray-200" />
+                  <EditQuestionModal question={question} />
+                  <div className="w-px bg-gray-200" />
+                  <ReextractButton questionId={question.id} />
+                </div>
+              </div>
+
+              {question.suggestedQuestionText && <ReviewSuggestionModal question={question} />}
             </div>
           )
         })}
