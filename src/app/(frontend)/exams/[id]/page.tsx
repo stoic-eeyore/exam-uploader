@@ -109,7 +109,34 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
 
         <div className="rounded-lg border p-4 bg-white">
           <div className="text-sm text-gray-500">Status</div>
-          <div className="text-lg font-bold mt-1">{exam.processingStatus}</div>
+          <div className="flex items-center gap-1.5 mt-1">
+            {exam.processingStatus === 'completed' ? (
+              <>
+                <CheckCircle2 size={16} className="text-emerald-500" />
+                <span className="text-lg font-bold text-emerald-600">Completed</span>
+              </>
+            ) : exam.processingStatus === 'review' ? (
+              <>
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                <span className="text-lg font-bold text-blue-600">Ready for Review</span>
+              </>
+            ) : exam.processingStatus === 'extracting' ? (
+              <>
+                <div className="w-4 h-4 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />
+                <span className="text-lg font-bold text-amber-600">Extracting...</span>
+              </>
+            ) : exam.processingStatus === 'failed' ? (
+              <>
+                <div className="w-2 h-2 bg-red-500 rounded-full" />
+                <span className="text-lg font-bold text-red-600">Failed</span>
+              </>
+            ) : (
+              <>
+                <div className="w-2 h-2 bg-gray-400 rounded-full" />
+                <span className="text-lg font-bold text-gray-600">Uploaded</span>
+              </>
+            )}
+          </div>
         </div>
 
         <div className="rounded-lg border p-4 bg-white">
