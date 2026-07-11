@@ -11,7 +11,9 @@ import EditQuestionModal from '@/components/questions/EditQuestionModal'
 import ReviewQuestionsButton from '@/components/exams/ReviewQuestionsButton'
 import VerifyButton from '@/components/questions/VerifyButton'
 import Link from 'next/link'
-import { ChevronLeft, CheckCircle2 } from 'lucide-react'
+import { ChevronLeft, CheckCircle2, Wrench } from 'lucide-react'
+import QualityIssuesEditor from '@/components/questions/QualityIssuesEditor'
+import FixesLog from '@/components/questions/FixesLog'
 
 export default async function ExamPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -40,6 +42,7 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
 
   const totalQuestions = questions.totalDocs
   const reviewedCount = questions.docs.filter((q: any) => q.status === 'verified').length
+  const fixedCount = questions.docs.reduce((sum: number, q: any) => sum + (q.fixes?.length || 0), 0)
   const allReviewed = totalQuestions > 0 && reviewedCount === totalQuestions
 
   return (
@@ -87,6 +90,11 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
               className={`text-sm font-medium inline-flex items-center gap-1 ${allReviewed ? 'text-emerald-600' : 'text-gray-400'}`}
             >
               {allReviewed && <CheckCircle2 size={14} />}({reviewedCount} reviewed)
+              {fixedCount > 0 && (
+                <span className="text-sm font-medium text-amber-600 inline-flex items-center gap-1">
+                  <Wrench size={14} />({fixedCount} fixed)
+                </span>
+              )}
             </span>
           </div>
           <div className="mt-2 w-full bg-gray-100 rounded-full h-1.5">
@@ -162,15 +170,9 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
                     )}
                   </div>
 
-                  {qualityIssues.length > 0 && (
-                    <div className="mb-3 space-y-1">
-                      {qualityIssues.map((issue: any, index: number) => (
-                        <div key={index} className="text-[13px] text-red-600">
-                          ⚠ {issue.issue}
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                  <div className="mb-3">
+                    <QualityIssuesEditor question={question} />
+                  </div>
 
                   <div className="prose max-w-none text-gray-800 text-[15px]">
                     <ReactMarkdown
@@ -215,6 +217,10 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
                   <div className="w-px bg-gray-200" />
                   <ReextractButton questionId={question.id} />
                 </div>
+              </div>
+
+              <div className="pl-[3.25rem] pt-2">
+                <FixesLog question={question} />
               </div>
 
               {question.suggestedQuestionText && <ReviewSuggestionModal question={question} />}

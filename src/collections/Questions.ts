@@ -214,5 +214,26 @@ export const Questions: CollectionConfig = {
         },
       },
     },
+
+    {
+      name: 'fixes',
+      type: 'array',
+      fields: [
+        {
+          name: 'note',
+          type: 'textarea',
+          required: true,
+        },
+        {
+          name: 'fixedBy',
+          type: 'relationship',
+          relationTo: 'users',
+        },
+        {
+          name: 'fixedAt',
+          type: 'date',
+        },
+      ],
+    },
   ],
 }

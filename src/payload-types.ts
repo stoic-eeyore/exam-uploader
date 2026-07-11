@@ -354,6 +354,14 @@ export interface Question {
   status?: ('draft' | 'verified') | null;
   verifiedBy?: (number | null) | User;
   verifiedAt?: string | null;
+  fixes?:
+    | {
+        note: string;
+        fixedBy?: (number | null) | User;
+        fixedAt?: string | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -630,6 +638,14 @@ export interface QuestionsSelect<T extends boolean = true> {
   status?: T;
   verifiedBy?: T;
   verifiedAt?: T;
+  fixes?:
+    | T
+    | {
+        note?: T;
+        fixedBy?: T;
+        fixedAt?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
