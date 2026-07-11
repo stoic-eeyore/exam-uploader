@@ -6,6 +6,30 @@ import AnalysisEditorModal from '@/components/inbox/AnalysisEditorModal'
 import ReviewConvertModal from '@/components/inbox/ReviewConvertModal'
 import type { AIAnalysis, Exam } from '@/types/pendingExams'
 
+function timeAgo(dateString: string | Date): string {
+  const date = new Date(dateString)
+  const now = new Date()
+  const seconds = Math.floor((now.getTime() - date.getTime()) / 1000)
+
+  const intervals = [
+    { label: 'year', seconds: 31536000 },
+    { label: 'month', seconds: 2592000 },
+    { label: 'week', seconds: 604800 },
+    { label: 'day', seconds: 86400 },
+    { label: 'hour', seconds: 3600 },
+    { label: 'minute', seconds: 60 },
+  ]
+
+  for (const interval of intervals) {
+    const count = Math.floor(seconds / interval.seconds)
+    if (count >= 1) {
+      return `${count} ${interval.label}${count > 1 ? 's' : ''} ago`
+    }
+  }
+
+  return 'just now'
+}
+
 export default function InboxPage() {
   const { data: session, status } = useSession()
   const [loading, setLoading] = useState(true)
@@ -148,7 +172,31 @@ export default function InboxPage() {
                 {filteredExams.map((item) => (
                   <tr key={item.id} className="border-b border-[#f3f4f6] align-middle">
                     <td className="py-3 text-sm text-[#374151]">
-                      <strong className="font-bold">{item.filename}</strong>
+                      <a
+                        href={item.driveUrl || '#'}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 text-[#111827] font-bold no-underline hover:text-[#2563eb] transition-colors group"
+                        title="Open in new tab"
+                      >
+                        {item.filename}
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="12"
+                          height="12"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          className="text-[#9ca3af] group-hover:text-[#2563eb] transition-colors flex-shrink-0"
+                        >
+                          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                          <polyline points="15 3 21 3 21 9" />
+                          <line x1="10" y1="14" x2="21" y2="3" />
+                        </svg>
+                      </a>
                     </td>
 
                     <td className="py-3 text-sm">
@@ -173,7 +221,6 @@ export default function InboxPage() {
                           onClick={() => {
                             console.log(item.aiAnalysis)
                             setEditingExam(item)
-                            // setSelectedAnalysis(item.aiAnalysis ?? null)
                           }}
                           className="px-3 py-1.5 bg-[#f5f7ff] text-[#4f46e5] border border-[#e0e7ff] rounded-[20px] cursor-pointer font-semibold text-xs inline-flex items-center gap-1 transition-all duration-200 no-underline"
                         >
@@ -215,29 +262,17 @@ export default function InboxPage() {
                       )}
                     </td>
 
-                    <td className="py-3 text-sm text-[#374151]">
-                      {item.uploadedAt ? new Date(item.uploadedAt).toLocaleDateString() : '-'}
+                    <td
+                      className="py-3 text-sm text-[#6b7280]"
+                      title={item.uploadedAt ? new Date(item.uploadedAt).toLocaleString() : ''}
+                    >
+                      {item.uploadedAt ? timeAgo(item.uploadedAt) : '-'}
                     </td>
 
                     <td className="py-3 text-sm text-right font-semibold text-gray-700">
                       <div className="flex justify-end items-center gap-2">
-                        <a
-                          href={item.driveUrl || '#'}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-[#2563eb] no-underline text-[13px]"
-                        >
-                          View
-                        </a>
-
                         <button
-                          // disabled={!item.aiAnalysis}
-                          className={`px-3 py-1 border rounded-[6px] text-xs transition ${
-                            // !item.aiAnalysis
-                            false
-                              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                              : 'bg-transparent text-[#6b7280] border-[#d1d5db] hover:bg-gray-50'
-                          }`}
+                          className="px-3 py-1 border rounded-[6px] text-xs transition bg-transparent text-[#6b7280] border-[#d1d5db] hover:bg-gray-50"
                           onClick={() => setReviewExam(item)}
                         >
                           Review & Convert
