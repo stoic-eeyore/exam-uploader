@@ -11,7 +11,7 @@ import EditQuestionModal from '@/components/questions/EditQuestionModal'
 import ReviewQuestionsButton from '@/components/exams/ReviewQuestionsButton'
 import VerifyButton from '@/components/questions/VerifyButton'
 import Link from 'next/link'
-import { ChevronLeft } from 'lucide-react'
+import { ChevronLeft, CheckCircle2 } from 'lucide-react'
 
 export default async function ExamPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -37,6 +37,10 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
 
     sort: ['questionType', 'questionNumber'],
   })
+
+  const totalQuestions = questions.totalDocs
+  const reviewedCount = questions.docs.filter((q: any) => q.status === 'verified').length
+  const allReviewed = totalQuestions > 0 && reviewedCount === totalQuestions
 
   return (
     <div className="p-6 space-y-6">
@@ -64,21 +68,41 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
       </div>
 
       <div className="grid grid-cols-3 gap-4">
-        <div className="rounded border p-4">
-          <div className="text-sm text-gray-500">Total Questions</div>
-          <div className="text-lg font-bold">{questions.totalDocs}</div>
+        <div className="rounded-lg border p-4 bg-white">
+          <div className="text-sm text-gray-500">Questions</div>
+          <div className="flex items-baseline gap-2 mt-1">
+            <span className="text-2xl font-bold text-gray-900">{totalQuestions}</span>
+            <span
+              className={`text-sm font-medium inline-flex items-center gap-1 ${allReviewed ? 'text-emerald-600' : 'text-gray-400'}`}
+            >
+              {allReviewed && <CheckCircle2 size={14} />}({reviewedCount} reviewed)
+            </span>
+          </div>
+          <div className="mt-2 w-full bg-gray-100 rounded-full h-1.5">
+            <div
+              className={`h-1.5 rounded-full transition-all ${allReviewed ? 'bg-emerald-500' : 'bg-blue-500'}`}
+              style={{
+                width: `${totalQuestions > 0 ? (reviewedCount / totalQuestions) * 100 : 0}%`,
+              }}
+            />
+          </div>
         </div>
 
-        <div className="rounded border p-4">
+        <div className="rounded-lg border p-4 bg-white">
           <div className="text-sm text-gray-500">Status</div>
-          <div className="text-lg font-bold">{exam.processingStatus}</div>
+          <div className="text-lg font-bold mt-1">{exam.processingStatus}</div>
         </div>
 
-        <div className="rounded border p-4">
+        <div className="rounded-lg border p-4 bg-white">
           <div className="text-sm text-gray-500">Link</div>
-          <div className="text-lg font-bold">
+          <div className="text-lg font-bold mt-1">
             {exam.driveUrl ? (
-              <a href={exam.driveUrl} target="_blank" rel="noreferrer">
+              <a
+                href={exam.driveUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="text-blue-600 hover:text-blue-700"
+              >
                 Open
               </a>
             ) : (
@@ -115,18 +139,7 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
 
                     {isVerified && (
                       <span className="rounded bg-emerald-100 px-2 py-1 text-xs text-emerald-700 font-medium inline-flex items-center gap-1">
-                        <svg
-                          width="12"
-                          height="12"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="3"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <polyline points="20 6 9 17 4 12" />
-                        </svg>
+                        <CheckCircle2 size={12} />
                         Verified
                       </span>
                     )}
@@ -182,7 +195,6 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
                 </div>
               )}
 
-              {/* Action Toolbar */}
               {/* Action Toolbar */}
               <div className="flex items-center pl-[3.25rem] pt-2 border-t border-gray-100">
                 <div className="inline-flex rounded-md border border-gray-200">

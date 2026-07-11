@@ -24,5 +24,5 @@ export const config = {
    * 3. /_next/static, /_next/image (Next.js framework compilation files)
    * 4. /favicon.ico, /images, /public (Static visual assets)
    */
-  matcher: ['/((?!$|api/auth|_next/static|_next/image|favicon.ico|public|images).*)'],
+  matcher: ['/((?!$|api/auth|_next/static|_next/image|favicon.ico|public|images|logo).*)'],
 }
