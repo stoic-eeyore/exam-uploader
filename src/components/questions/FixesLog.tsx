@@ -69,7 +69,7 @@ export default function FixesLog({ question }: FixesLogProps) {
                         </span>
                         <span className="inline-flex items-center gap-1">
                           <Clock size={10} />
-                          {new Date(fix.fixedAt).toLocaleDateString()}
+                          {fix.fixedAt ? new Date(fix.fixedAt).toISOString().split('T')[0] : ''}
                         </span>
                       </div>
                     )}

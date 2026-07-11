@@ -16,10 +16,14 @@ export default function QualityIssuesEditor({ question }: QualityIssuesEditorPro
 
   const severityColor = (s: string) => {
     switch (s) {
-      case 'high': return 'bg-red-100 text-red-700 border-red-200'
-      case 'medium': return 'bg-amber-100 text-amber-700 border-amber-200'
-      case 'low': return 'bg-blue-100 text-blue-700 border-blue-200'
-      default: return 'bg-gray-100 text-gray-700'
+      case 'high':
+        return 'bg-red-100 text-red-700 border-red-200'
+      case 'medium':
+        return 'bg-amber-100 text-amber-700 border-amber-200'
+      case 'low':
+        return 'bg-blue-100 text-blue-700 border-blue-200'
+      default:
+        return 'bg-gray-100 text-gray-700'
     }
   }
 
@@ -28,9 +32,9 @@ export default function QualityIssuesEditor({ question }: QualityIssuesEditorPro
     setSaving(true)
 
     const updated = [...issues, { issue: newIssue, severity: newSeverity }]
-    
+
     try {
-      await fetch(`/api/questions/${question.id}`, {
+      await fetch(`/api/questions/${question.id}/quality-issues`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ qualityIssues: updated }),
@@ -47,9 +51,9 @@ export default function QualityIssuesEditor({ question }: QualityIssuesEditorPro
 
   async function handleRemove(index: number) {
     const updated = issues.filter((_: any, i: number) => i !== index)
-    
+
     try {
-      await fetch(`/api/questions/${question.id}`, {
+      await fetch(`/api/questions/${question.id}/quality-issues`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ qualityIssues: updated }),
@@ -67,7 +71,9 @@ export default function QualityIssuesEditor({ question }: QualityIssuesEditorPro
           <AlertTriangle size={14} className="text-red-500 mt-0.5 flex-shrink-0" />
           <div className="flex-1">
             <span className="text-[13px] text-red-600">{issue.issue}</span>
-            <span className={`ml-2 text-[11px] px-1.5 py-0.5 rounded border ${severityColor(issue.severity)}`}>
+            <span
+              className={`ml-2 text-[11px] px-1.5 py-0.5 rounded border ${severityColor(issue.severity)}`}
+            >
               {issue.severity}
             </span>
           </div>
@@ -119,4 +125,3 @@ export default function QualityIssuesEditor({ question }: QualityIssuesEditorPro
     </div>
   )
 }
-
