@@ -51,7 +51,7 @@ async function findOrCreateFolder(name: string, parentId?: string): Promise<stri
   return folder.data.id!
 }
 
-async function getFolderPathIds({
+export async function getFolderPathIds({
   year,
   grade,
   subject,
@@ -114,7 +114,10 @@ export async function uploadToDrive({
     supportsAllDrives: true,
   })
 
-  return `https://drive.google.com/file/d/${fileId}/view`
+  return {
+    url: `https://drive.google.com/file/d/${fileId}/view`,
+    fileId,
+  }
 }
 
 export function extractDriveFileId(url: string) {
@@ -355,7 +358,7 @@ export async function convertDriveDocxToPdfFile({
 
 export async function organizeInDrive(
   fileId: string,
-  oldFolderId: string,
+  oldFolderId: string | undefined,
   year: string,
   grade: string,
   subject: string,
@@ -367,6 +370,24 @@ export async function organizeInDrive(
     subject,
   })
 
+  if (!oldFolderId) {
+    const file = await drive.files.get({
+      fileId,
+      fields: 'parents',
+      supportsAllDrives: true,
+    })
+    const currentParents = file.data.parents || []
+    if (currentParents.length > 0) {
+      oldFolderId = currentParents[0]
+    }
+  }
+
+  if (parentFolderId === oldFolderId) {
+    console.log(`File ${fileId} is already in the correct folder. No move needed.`)
+    return
+  }
+
+  console.log(`Moving file ${fileId} from ${oldFolderId} to ${parentFolderId}`)
   await drive.files.update({
     fileId,
     addParents: parentFolderId,

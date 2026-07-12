@@ -39,7 +39,7 @@ export async function POST(req: Request) {
   const buffer = Buffer.from(await file.arrayBuffer())
 
   // Upload directly to Google Drive
-  const driveUrl = await uploadToDrive({
+  const driveResult = await uploadToDrive({
     buffer,
     filename: name,
     mimeType: file.type,
@@ -62,7 +62,8 @@ export async function POST(req: Request) {
       mimeType: file.type,
       filesize: file.size,
 
-      driveUrl,
+      driveUrl: driveResult.url,
+      driveFileId: driveResult.fileId,
     },
   })
 
