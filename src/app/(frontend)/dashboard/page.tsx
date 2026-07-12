@@ -463,7 +463,7 @@ export default function DashboardPage() {
                           )}
                           <Link
                             href={`/exams/${exam.id}`}
-                            classpx="text-[#2563eb] hover:text-[#1d4ed8] hover:underline transition-colors duration-150"
+                            className="text-[#2563eb] hover:text-[#1d4ed8] hover:underline transition-colors duration-150"
                           >
                             Details
                           </Link>
