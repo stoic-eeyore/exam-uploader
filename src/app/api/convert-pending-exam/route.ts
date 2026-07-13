@@ -92,6 +92,7 @@ export async function POST(req: NextRequest) {
       collection: 'pending-exams',
       id: pendingExam.id,
       data: {
+        status: 'processed',
         processed: true,
       },
     })
