@@ -39,7 +39,7 @@ export default function InboxPage() {
 
   const fetchPendingExams = async () => {
     try {
-      const res = await fetch('/api/pending-exams?sort=-updatedAt')
+      const res = await fetch('/api/pending-exams?sort=-updatedAt&limit=100')
       if (!res.ok) throw new Error(`Failed to fetch: ${res.status}`)
       const data = await res.json()
       setRecent(data.docs || [])
