@@ -74,11 +74,15 @@ export default function InboxTableRow({
       <td className="py-3 text-sm">
         <span
           className={`px-2 py-0.5 rounded-[4px] text-xs font-medium ${
-            exam.processed ? 'bg-[#dcfce7] text-[#166534]' : 'bg-[#fef3c7] text-[#92400e]'
+            exam.status === 'processed'
+              ? 'bg-[#dcfce7] text-[#166534]'
+              : exam.status === 'archived'
+                ? 'bg-[#f3f4f6] text-[#6b7280]'
+                : 'bg-[#fef3c7] text-[#92400e]'
           }`}
         >
-          {exam.processed ? 'Processed' : 'Pending'}
-        </span>
+          {exam.status === 'new' ? 'New' : exam.status === 'processed' ? 'Processed' : 'Archived'}
+        </span>{' '}
       </td>
 
       <td className="py-3 text-sm text-[#374151]">

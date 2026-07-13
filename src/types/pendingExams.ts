@@ -9,6 +9,7 @@ export type AIAnalysis = {
 export type Exam = {
   id: number
   filename: string
+  status: string
   processed: boolean
   filesize?: number
   uploadedAt?: string

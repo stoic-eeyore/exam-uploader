@@ -291,6 +291,7 @@ export interface PendingExam {
     | number
     | boolean
     | null;
+  status?: ('new' | 'processed' | 'archived') | null;
   processed?: boolean | null;
   fileHash?: string | null;
   uploadedBy?: (number | null) | User;
@@ -577,6 +578,7 @@ export interface PendingExamsSelect<T extends boolean = true> {
   driveUrl?: T;
   driveFileId?: T;
   aiAnalysis?: T;
+  status?: T;
   processed?: T;
   fileHash?: T;
   uploadedBy?: T;

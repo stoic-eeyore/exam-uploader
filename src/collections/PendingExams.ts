@@ -54,6 +54,17 @@ export const PendingExams: CollectionConfig = {
     },
 
     {
+      name: 'status',
+      type: 'select',
+      defaultValue: 'new',
+      options: [
+        { label: 'New', value: 'new' },
+        { label: 'Processed', value: 'processed' },
+        { label: 'Archived', value: 'archived' },
+      ],
+    },
+
+    {
       name: 'processed',
       type: 'checkbox',
       defaultValue: false,

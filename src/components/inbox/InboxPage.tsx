@@ -21,7 +21,16 @@ export default function InboxPage() {
   const [syncing, setSyncing] = useState(false)
 
   const [search, setSearch] = useState('')
-  const [statusFilter, setStatusFilter] = useState<'all' | 'processed' | 'pending'>('all')
+
+  type StatusFilter = 'all' | 'new' | 'processed' | 'archived'
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('new')
+
+  const STATUS_FILTERS = {
+    all: () => true,
+    new: (e: Exam) => e.status === 'new',
+    processed: (e: Exam) => e.status === 'processed',
+    archived: (e: Exam) => e.status === 'archived',
+  } as const
 
   const showToast = useCallback((message: string, type: 'success' | 'error') => {
     setToast({ message, type })
@@ -102,12 +111,7 @@ export default function InboxPage() {
 
   const filteredExams = recent.filter((exam) => {
     const matchesSearch = exam.filename.toLowerCase().includes(search.toLowerCase())
-    const matchesStatus =
-      statusFilter === 'all'
-        ? true
-        : statusFilter === 'processed'
-          ? exam.processed
-          : !exam.processed
+    const matchesStatus = STATUS_FILTERS[statusFilter](exam)
     return matchesSearch && matchesStatus
   })
 
