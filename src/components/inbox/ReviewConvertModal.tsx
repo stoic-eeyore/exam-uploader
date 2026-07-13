@@ -1,31 +1,26 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { Loader2 } from 'lucide-react'
 import { useExamOptions } from '@/hooks/useExamOptions'
 import type { Exam } from '@/types/pendingExams'
 
 type Props = {
   exam: Exam | null
-  converting: boolean
   onClose: () => void
   onConverted: (examId: number) => void
-  setConvertingId: (id: number | null) => void
 }
 
-// Generate a list of academic years (e.g., ["2023/2024", "2024/2025", "2025/2026", "2026/2027"])
 const currentYear = new Date().getFullYear()
 const ACADEMIC_YEARS = Array.from({ length: 6 }, (_, i) => {
   const start = currentYear - i
   return `${start}/${start + 1}`
 })
 
-export default function ReviewConvertModal({
-  exam,
-  converting,
-  onClose,
-  onConverted,
-  setConvertingId,
-}: Props) {
+export default function ReviewConvertModal({ exam, onClose, onConverted }: Props) {
+  const [converting, setConverting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
   const [form, setForm] = useState({
     label: '',
     year: '',
@@ -38,6 +33,7 @@ export default function ReviewConvertModal({
   useEffect(() => {
     if (!exam?.aiAnalysis) return
 
+    setError(null)
     setForm({
       label: exam.aiAnalysis.label || '',
       year: exam.aiAnalysis.year || '2025/2026',
@@ -52,20 +48,29 @@ export default function ReviewConvertModal({
     <div
       className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50"
       onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="review-title"
     >
       <div
-        //className="bg-white text-black w-full max-w-sm border border-black p-4 font-mono text-xs shadow-md"
         className="bg-white w-full max-w-lg rounded-xl shadow-xl p-6"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-xl font-bold mb-1">Review Exam</h2>
+        <h2 id="review-title" className="text-xl font-bold mb-1">
+          Review Exam
+        </h2>
 
         <p className="text-sm text-gray-500 mb-6">{exam.filename}</p>
+
+        {error && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+            {error}
+          </div>
+        )}
 
         <div className="space-y-3">
           <div>
             <label className="block text-sm font-medium mb-1">Grade</label>
-
             <select
               value={form.gradeId}
               onChange={(e) =>
@@ -74,10 +79,10 @@ export default function ReviewConvertModal({
                   gradeId: e.target.value,
                 }))
               }
-              className="w-full border rounded-lg px-3 py-2 bg-white"
+              disabled={loading}
+              className="w-full border rounded-lg px-3 py-2 bg-white disabled:bg-gray-50 disabled:text-gray-400"
             >
-              <option value="">Select grade</option>
-
+              <option value="">{loading ? 'Loading...' : 'Select grade'}</option>
               {grades.map((grade) => (
                 <option key={grade.id} value={grade.id}>
                   {grade.name}
@@ -88,7 +93,6 @@ export default function ReviewConvertModal({
 
           <div>
             <label className="block text-sm font-medium mb-1">Subject</label>
-
             <select
               value={form.subjectId}
               onChange={(e) =>
@@ -97,10 +101,10 @@ export default function ReviewConvertModal({
                   subjectId: e.target.value,
                 }))
               }
-              className="w-full border rounded-lg px-3 py-2 bg-white"
+              disabled={loading}
+              className="w-full border rounded-lg px-3 py-2 bg-white disabled:bg-gray-50 disabled:text-gray-400"
             >
-              <option value="">Select subject</option>
-
+              <option value="">{loading ? 'Loading...' : 'Select subject'}</option>
               {subjects.map((subject) => (
                 <option key={subject.id} value={subject.id}>
                   {subject.name}
@@ -111,7 +115,6 @@ export default function ReviewConvertModal({
 
           <div>
             <label className="block text-sm font-medium mb-1">Label</label>
-
             <input
               value={form.label}
               onChange={(e) =>
@@ -126,7 +129,6 @@ export default function ReviewConvertModal({
 
           <div>
             <label className="block text-sm font-medium mb-1">Year</label>
-
             <select
               value={form.year}
               onChange={(e) =>
@@ -148,24 +150,29 @@ export default function ReviewConvertModal({
         </div>
 
         <div className="flex justify-end gap-3 mt-6">
-          <button onClick={onClose} className="px-4 py-2 border rounded-lg">
+          <button
+            onClick={onClose}
+            disabled={converting}
+            className="px-4 py-2 border rounded-lg hover:bg-gray-50 disabled:opacity-50"
+          >
             Cancel
           </button>
 
           <button
-            disabled={converting}
-            className={`px-4 py-2 rounded-lg text-white ${
-              converting ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+            disabled={converting || loading || !form.gradeId || !form.subjectId || !form.year}
+            className={`px-4 py-2 rounded-lg text-white inline-flex items-center ${
+              converting || loading
+                ? 'bg-gray-400 cursor-not-allowed'
+                : 'bg-blue-600 hover:bg-blue-700'
             }`}
             onClick={async () => {
-              try {
-                setConvertingId(exam.id)
+              setConverting(true)
+              setError(null)
 
+              try {
                 const res = await fetch('/api/convert-pending-exam', {
                   method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
+                  headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({
                     pendingExamId: exam.id,
                     label: form.label,
@@ -178,21 +185,28 @@ export default function ReviewConvertModal({
                 const data = await res.json()
 
                 if (!res.ok) {
-                  alert(data.error || 'Conversion failed')
-                  return
+                  throw new Error(data.error || 'Conversion failed')
                 }
 
                 onConverted(exam.id)
                 onClose()
               } catch (err) {
+                const message = err instanceof Error ? err.message : 'Conversion failed'
+                setError(message)
                 console.error(err)
-                alert('Conversion failed')
               } finally {
-                setConvertingId(null)
+                setConverting(false)
               }
             }}
           >
-            {converting ? 'Converting...' : 'Confirm Convert'}
+            {converting ? (
+              <>
+                <Loader2 size={14} className="animate-spin mr-1.5" />
+                Converting...
+              </>
+            ) : (
+              'Confirm Convert'
+            )}
           </button>
         </div>
       </div>
