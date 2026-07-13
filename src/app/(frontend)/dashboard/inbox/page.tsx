@@ -32,7 +32,7 @@ function timeAgo(dateString: string | Date): string {
 export default function InboxPage() {
   const [loading, setLoading] = useState(true)
   const [recent, setRecent] = useState<Exam[]>([])
-  const [analyzingId, setAnalyzingId] = useState<number | null>(null)
+  const [analyzingIds, setAnalyzingIds] = useState<Set<number>>(new Set())
   const [selectedAnalysis, setSelectedAnalysis] = useState<AIAnalysis | null>(null)
   const [syncing, setSyncing] = useState(false)
   const [reviewExam, setReviewExam] = useState<Exam | null>(null)
@@ -96,6 +96,20 @@ export default function InboxPage() {
 
     return matchesSearch && matchesStatus
   })
+
+  const startAnalyzing = (id: number) => {
+    setAnalyzingIds((prev) => new Set(prev).add(id))
+  }
+
+  const stopAnalyzing = (id: number) => {
+    setAnalyzingIds((prev) => {
+      const next = new Set(prev)
+      next.delete(id)
+      return next
+    })
+  }
+
+  const isAnalyzing = (id: number) => analyzingIds.has(id)
 
   return (
     <div className="min-h-screen bg-[#f9fafb] p-5 font-sans">
@@ -242,14 +256,14 @@ export default function InboxPage() {
                           </button>
                         ) : (
                           <button
-                            disabled={analyzingId === item.id}
+                            disabled={isAnalyzing(item.id)}
                             className={`px-3 py-1.5 text-white border-none rounded-[20px] cursor-pointer font-semibold text-xs transition-all duration-200 flex items-center gap-1 shadow-[0_2px_4px_rgba(99,102,241,0.2)] ${
-                              analyzingId === item.id
+                              isAnalyzing(item.id)
                                 ? 'opacity-70 cursor-not-allowed bg-[#9ca3af] shadow-none'
                                 : 'bg-gradient-to-br from-[#6366f1] to-[#a855f7]'
                             }`}
                             onClick={async () => {
-                              setAnalyzingId(item.id)
+                              startAnalyzing(item.id)
                               try {
                                 const res = await fetch('/api/analyze-pending-exam', {
                                   method: 'POST',
@@ -273,11 +287,11 @@ export default function InboxPage() {
                                   err instanceof Error ? err.message : 'Analysis failed'
                                 showToast(message, 'error')
                               } finally {
-                                setAnalyzingId(null)
+                                stopAnalyzing(item.id)
                               }
                             }}
                           >
-                            {analyzingId === item.id ? '...' : '✨ Analyze'}
+                            {isAnalyzing(item.id) ? '...' : '✨ Analyze'}
                           </button>
                         )}
                       </td>
