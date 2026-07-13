@@ -8,6 +8,8 @@ type Props = {
   onAnalyze: (exam: Exam) => void
   onViewAnalysis: (exam: Exam) => void
   onReview: (exam: Exam) => void
+  onArchive: (exam: Exam) => void
+  isArchiving: boolean
 }
 
 function timeAgo(dateString: string | Date): string {
@@ -40,6 +42,8 @@ export default function InboxTableRow({
   onAnalyze,
   onViewAnalysis,
   onReview,
+  onArchive,
+  isArchiving,
 }: Props) {
   return (
     <tr className="border-b border-[#f3f4f6] align-middle">
@@ -126,6 +130,16 @@ export default function InboxTableRow({
             onClick={() => onReview(exam)}
           >
             Review & Convert
+          </button>
+          <button
+            disabled={isArchiving}
+            className={`text-xs transition opacity-60 hover:opacity-100 ${
+              isArchiving ? 'text-gray-300 cursor-not-allowed' : 'text-gray-400 hover:text-gray-600'
+            }`}
+            onClick={() => onArchive(exam)}
+            title="Archive"
+          >
+            {isArchiving ? '...' : 'Archive'}
           </button>
         </div>
       </td>

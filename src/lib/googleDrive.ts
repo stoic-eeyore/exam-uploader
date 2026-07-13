@@ -400,3 +400,33 @@ export async function organizeInDrive(
     },
   })
 }
+
+export async function moveToArchiveFolder({
+  fileId,
+  filename,
+}: {
+  fileId: string
+  filename: string
+}) {
+  const archiveFolderId = process.env.GOOGLE_DRIVE_ARCHIVE_FOLDER_ID
+
+  if (!archiveFolderId) {
+    throw new Error('GOOGLE_DRIVE_ARCHIVE_FOLDER_ID not configured')
+  }
+
+  const file = await drive.files.get({
+    fileId,
+    fields: 'parents',
+    supportsAllDrives: true,
+  })
+
+  const currentParents = file.data.parents || []
+
+  await drive.files.update({
+    fileId,
+    addParents: archiveFolderId,
+    removeParents: currentParents.join(','),
+    supportsAllDrives: true,
+    fields: 'id, parents',
+  })
+}

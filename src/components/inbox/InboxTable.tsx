@@ -6,17 +6,21 @@ import type { Exam } from '@/types/pendingExams'
 type Props = {
   exams: Exam[]
   analyzingIds: Set<number>
+  archivingIds: Set<number>
   onAnalyze: (exam: Exam) => void
   onViewAnalysis: (exam: Exam) => void
   onReview: (exam: Exam) => void
+  onArchive: (exam: Exam) => void
 }
 
 export default function InboxTable({
   exams,
   analyzingIds,
+  archivingIds,
   onAnalyze,
   onViewAnalysis,
   onReview,
+  onArchive,
 }: Props) {
   return (
     <div className="overflow-x-auto">
@@ -50,9 +54,11 @@ export default function InboxTable({
               key={exam.id}
               exam={exam}
               isAnalyzing={analyzingIds.has(exam.id)}
+              isArchiving={archivingIds.has(exam.id)}
               onAnalyze={onAnalyze}
               onViewAnalysis={onViewAnalysis}
               onReview={onReview}
+              onArchive={onArchive}
             />
           ))}
         </tbody>

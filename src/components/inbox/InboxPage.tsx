@@ -109,6 +109,39 @@ export default function InboxPage() {
     }
   }
 
+  const [archivingIds, setArchivingIds] = useState<Set<number>>(new Set())
+
+  const startArchiving = (id: number) => {
+    setArchivingIds((prev) => new Set(prev).add(id))
+  }
+
+  const stopArchiving = (id: number) => {
+    setArchivingIds((prev) => {
+      const next = new Set(prev)
+      next.delete(id)
+      return next
+    })
+  }
+
+  const handleArchive = async (exam: Exam) => {
+    startArchiving(exam.id)
+    try {
+      const res = await fetch(`/api/pending-exams/${exam.id}/archive`, {
+        method: 'POST',
+      })
+      if (!res.ok) throw new Error(await res.text())
+
+      // Update local state to archived
+      setRecent((prev) => prev.map((e) => (e.id === exam.id ? { ...e, status: 'archived' } : e)))
+      showToast('Exam archived', 'success')
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Archive failed'
+      showToast(message, 'error')
+    } finally {
+      stopArchiving(exam.id)
+    }
+  }
+
   const filteredExams = recent.filter((exam) => {
     const matchesSearch = exam.filename.toLowerCase().includes(search.toLowerCase())
     const matchesStatus = STATUS_FILTERS[statusFilter](exam)
@@ -136,9 +169,11 @@ export default function InboxPage() {
             <InboxTable
               exams={filteredExams}
               analyzingIds={analyzingIds}
+              archivingIds={archivingIds}
               onAnalyze={handleAnalyze}
               onViewAnalysis={(exam) => setEditingExam(exam)}
               onReview={(exam) => setReviewExam(exam)}
+              onArchive={handleArchive}
             />
           ) : (
             <InboxEmptyState hasFilters={recent.length > 0} />
