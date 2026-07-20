@@ -6,7 +6,7 @@ export async function GET() {
 
   const recentUploads = await payload.find({
     collection: 'exams',
-    limit: 10,
+    limit: 200,
     sort: '-createdAt',
     // Switch to depth: 0 if you don't need related user/category objects populated
     depth: 1,
