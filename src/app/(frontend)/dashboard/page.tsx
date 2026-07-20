@@ -7,6 +7,7 @@ import { DashboardData, Exam, AnalysisResponse } from './types'
 import { FilterBar, FilterState } from './components/FilterBar'
 import { ExamTable } from './components/ExamTable'
 import { AnalysisModal } from './components/AnalysisModal'
+import { StatsCards } from './components/StatsCards'
 
 export default function DashboardPage() {
   const { data: session, status: sessionStatus } = useSession()
@@ -19,6 +20,8 @@ export default function DashboardPage() {
   const [analyzingId, setAnalyzingId] = useState<number | null>(null)
   const [selectedAnalysis, setSelectedAnalysis] = useState<string | null>(null)
   const [analysisError, setAnalysisError] = useState<string | null>(null)
+  const [stats, setStats] = useState<{ total: number; byStatus: any } | null>(null)
+  const [statsLoading, setStatsLoading] = useState(true)
 
   // Filters
   const [filters, setFilters] = useState<FilterState>({
@@ -40,21 +43,31 @@ export default function DashboardPage() {
 
   // ── Load dashboard data ───────────────────────────────────────────
   useEffect(() => {
-    async function loadDashboard() {
+    async function loadAll() {
       try {
-        const res = await fetch('/api/dashboard')
-        if (!res.ok) throw new Error(`Failed to load dashboard: ${res.status}`)
-        const data: DashboardData = await res.json()
-        setTotalExams(data.totalExams)
-        setRecent(data.recent)
+        const [dashRes, statsRes] = await Promise.all([
+          fetch('/api/dashboard'),
+          fetch('/api/dashboard/stats'),
+        ])
+
+        if (!dashRes.ok) throw new Error(`Failed to load dashboard: ${dashRes.status}`)
+        if (!statsRes.ok) throw new Error(`Failed to load stats: ${statsRes.status}`)
+
+        const dashData: DashboardData = await dashRes.json()
+        const statData = await statsRes.json()
+
+        setTotalExams(dashData.totalExams)
+        setRecent(dashData.recent)
+        setStats(statData)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load dashboard')
         console.error('Dashboard load error:', err)
       } finally {
         setLoading(false)
+        setStatsLoading(false)
       }
     }
-    loadDashboard()
+    loadAll()
   }, [])
 
   // ── Dev mode toggle (type "zyx") ──────────────────────────────────
@@ -76,10 +89,20 @@ export default function DashboardPage() {
 
   // ── Extract unique filter options from data ───────────────────────
   const filterOptions = useMemo(() => {
-    const grades = [...new Set(recent.map((e) => e.grade?.name).filter((name): name is string => Boolean(name)))].sort()
-    const subjects = [...new Set(recent.map((e) => e.subject?.name).filter((name): name is string => Boolean(name)))].sort()
-    const labels = [...new Set(recent.map((e) => e.label).filter((label): label is string => Boolean(label)))].sort()
-    const years = [...new Set(recent.map((e) => e.year).filter((year): year is string => Boolean(year)))].sort()
+    const grades = [
+      ...new Set(recent.map((e) => e.grade?.name).filter((name): name is string => Boolean(name))),
+    ].sort()
+    const subjects = [
+      ...new Set(
+        recent.map((e) => e.subject?.name).filter((name): name is string => Boolean(name)),
+      ),
+    ].sort()
+    const labels = [
+      ...new Set(recent.map((e) => e.label).filter((label): label is string => Boolean(label))),
+    ].sort()
+    const years = [
+      ...new Set(recent.map((e) => e.year).filter((year): year is string => Boolean(year))),
+    ].sort()
     return { grades, subjects, labels, years }
   }, [recent])
 
@@ -199,6 +222,9 @@ export default function DashboardPage() {
             </button>
           </div>
         )}
+
+        {/* Stats row */}
+        <StatsCards stats={stats!} loading={statsLoading} />
 
         {/* Filters */}
         {!loading && recent.length > 0 && (
