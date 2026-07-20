@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/extract-exam",
+      "schedule": "*/30 * * * *"
+    }
+  ]
+}
