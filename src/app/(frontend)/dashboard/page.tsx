@@ -76,10 +76,10 @@ export default function DashboardPage() {
 
   // ── Extract unique filter options from data ───────────────────────
   const filterOptions = useMemo(() => {
-    const grades = [...new Set(recent.map((e) => e.grade?.name).filter(Boolean))].sort()
-    const subjects = [...new Set(recent.map((e) => e.subject?.name).filter(Boolean))].sort()
-    const labels = [...new Set(recent.map((e) => e.label).filter(Boolean))].sort()
-    const years = [...new Set(recent.map((e) => e.year).filter(Boolean))].sort()
+    const grades = [...new Set(recent.map((e) => e.grade?.name).filter((name): name is string => Boolean(name)))].sort()
+    const subjects = [...new Set(recent.map((e) => e.subject?.name).filter((name): name is string => Boolean(name)))].sort()
+    const labels = [...new Set(recent.map((e) => e.label).filter((label): label is string => Boolean(label)))].sort()
+    const years = [...new Set(recent.map((e) => e.year).filter((year): year is string => Boolean(year)))].sort()
     return { grades, subjects, labels, years }
   }, [recent])
 
