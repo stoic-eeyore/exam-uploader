@@ -58,7 +58,7 @@ async function reviewExam(payload: BasePayload) {
           },
         },
         {
-          reviewed_by_a_i: {
+          reviewedByAI: {
             equals: false,
           },
         },
