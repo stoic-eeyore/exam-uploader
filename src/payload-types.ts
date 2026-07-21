@@ -263,7 +263,7 @@ export interface Exam {
     | null;
   aiRawResponse?: string | null;
   fileHash?: string | null;
-  processingStatus?: ('uploaded' | 'extracting' | 'review' | 'completed' | 'failed') | null;
+  processingStatus?: ('uploaded' | 'extracting' | 'review' | 'consultation' | 'completed' | 'failed') | null;
   processingError?: string | null;
   reviewedByAI?: boolean | null;
   uploadedBy?: (number | null) | User;

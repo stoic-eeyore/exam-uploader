@@ -128,7 +128,8 @@ export const Exams: CollectionConfig = {
       options: [
         { label: 'Uploaded', value: 'uploaded' },
         { label: 'Extracting', value: 'extracting' },
-        { label: 'Review', value: 'review' },
+        { label: 'In Review', value: 'review' },
+        { label: 'Pending Consultation', value: 'consultation' },
         { label: 'Completed', value: 'completed' },
         { label: 'Failed', value: 'failed' },
       ],

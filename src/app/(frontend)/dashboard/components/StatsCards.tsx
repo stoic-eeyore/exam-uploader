@@ -9,6 +9,7 @@ type Stats = {
     uploaded: number
     extracting: number
     review: number
+    consultation: number
     completed: number
     failed: number
   }
@@ -42,8 +43,9 @@ export function StatsCards({ stats, loading }: StatsCardsProps) {
     { key: 'uploaded', ...STATUS_CONFIG.uploaded, count: stats.byStatus.uploaded },
     { key: 'extracting', ...STATUS_CONFIG.extracting, count: stats.byStatus.extracting },
     { key: 'review', ...STATUS_CONFIG.review, count: stats.byStatus.review },
+    { key: 'consultation', ...STATUS_CONFIG.consultation, count: stats.byStatus.consultation },
     { key: 'completed', ...STATUS_CONFIG.completed, count: stats.byStatus.completed },
-    { key: 'failed', ...STATUS_CONFIG.failed, count: stats.byStatus.failed },
+    // { key: 'failed', ...STATUS_CONFIG.failed, count: stats.byStatus.failed },
   ]
 
   return (

@@ -14,6 +14,7 @@ import { ChevronLeft, CheckCircle2, Wrench } from 'lucide-react'
 import QualityIssuesEditor from '@/components/questions/QualityIssuesEditor'
 import FixesLog from '@/components/questions/FixesLog'
 import ExamMetaDataEditor from '@/components/exams/ExamMetaDataEditor'
+import StatusEditor from '@/components/exams/StatusEditor'
 
 export default async function ExamPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -100,18 +101,32 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
           </div>
         </div>
 
+        {/* NEW — editable status */}
         <div className="rounded-lg border p-4 bg-white">
-          <div className="text-sm text-gray-500">Status</div>
+          <div className="flex items-center justify-between mb-1">
+            <div className="text-sm text-gray-500">Status</div>
+            <StatusEditor
+              examId={String(exam.id)}
+              currentStatus={(exam.processingStatus as any) || 'uploaded'}
+            />
+          </div>
+
+          {/* Visual indicator that stays in sync */}
           <div className="flex items-center gap-1.5 mt-1">
             {exam.processingStatus === 'completed' ? (
               <>
                 <CheckCircle2 size={16} className="text-emerald-500" />
                 <span className="text-lg font-bold text-emerald-600">Completed</span>
               </>
+            ) : exam.processingStatus === 'consultation' ? (
+              <>
+                <div className="w-2 h-2 bg-violet-500 rounded-full animate-pulse" />
+                <span className="text-lg font-bold text-violet-600">Pending Consultation</span>
+              </>
             ) : exam.processingStatus === 'review' ? (
               <>
                 <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-                <span className="text-lg font-bold text-blue-600">Ready for Review</span>
+                <span className="text-lg font-bold text-blue-600">In Review</span>
               </>
             ) : exam.processingStatus === 'extracting' ? (
               <>

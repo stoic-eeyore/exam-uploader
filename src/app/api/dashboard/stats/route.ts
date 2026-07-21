@@ -9,10 +9,11 @@ export async function GET() {
   const total = await payload.count({ collection: 'exams' })
 
   // Count per status — parallel for speed
-  const [uploaded, extracting, review, completed, failed] = await Promise.all([
+  const [uploaded, extracting, review, consultation, completed, failed] = await Promise.all([
     payload.count({ collection: 'exams', where: { processingStatus: { equals: 'uploaded' } } }),
     payload.count({ collection: 'exams', where: { processingStatus: { equals: 'extracting' } } }),
     payload.count({ collection: 'exams', where: { processingStatus: { equals: 'review' } } }),
+    payload.count({ collection: 'exams', where: { processingStatus: { equals: 'consultation' } } }),
     payload.count({ collection: 'exams', where: { processingStatus: { equals: 'completed' } } }),
     payload.count({ collection: 'exams', where: { processingStatus: { equals: 'failed' } } }),
   ])
@@ -23,6 +24,7 @@ export async function GET() {
       uploaded: uploaded.totalDocs,
       extracting: extracting.totalDocs,
       review: review.totalDocs,
+      consultation: consultation.totalDocs,
       completed: completed.totalDocs,
       failed: failed.totalDocs,
     },
