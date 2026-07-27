@@ -8,6 +8,9 @@ export default function EditQuestionModal({ question }: { question: any }) {
   const [options, setOptions] = useState(question.options || [])
   const [questionText, setQuestionText] = useState(question.questionText)
   const [questionType, setQuestionType] = useState(question.questionType)
+  const [imageUrl, setImageUrl] = useState(question.images?.[0]?.url ?? '')
+  const [imagePlacement, setImagePlacement] = useState(question.images?.[0]?.placement ?? 'right')
+  const [imageWidth, setImageWidth] = useState(question.images?.[0]?.width ?? 220)
   const [saving, setSaving] = useState(false)
 
   async function handleSave() {
@@ -22,6 +25,16 @@ export default function EditQuestionModal({ question }: { question: any }) {
           questionText,
           questionType,
           options,
+
+          images: imageUrl
+            ? [
+                {
+                  url: imageUrl,
+                  placement: imagePlacement,
+                  width: imageWidth,
+                },
+              ]
+            : [],
         }),
       })
       window.location.reload()
@@ -85,6 +98,55 @@ export default function EditQuestionModal({ question }: { question: any }) {
                   rows={8}
                   className="border border-gray-200 rounded-lg px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-y"
                 />
+              </div>
+
+              <div className="rounded-lg border border-gray-200 p-4 space-y-4">
+                <h3 className="font-medium text-gray-900">Image</h3>
+
+                <div>
+                  <label className="block mb-1.5 text-sm font-medium text-gray-700">
+                    Image URL
+                  </label>
+
+                  <input
+                    type="text"
+                    value={imageUrl}
+                    onChange={(e) => setImageUrl(e.target.value)}
+                    placeholder="https://..."
+                    className="border border-gray-200 rounded-lg px-3 py-2 w-full text-sm"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block mb-1.5 text-sm font-medium text-gray-700">
+                      Placement
+                    </label>
+
+                    <select
+                      value={imagePlacement}
+                      onChange={(e) => setImagePlacement(e.target.value)}
+                      className="border border-gray-200 rounded-lg px-3 py-2 w-full text-sm"
+                    >
+                      <option value="right">Right</option>
+                      <option value="top">Top</option>
+                      <option value="inline">Inline</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block mb-1.5 text-sm font-medium text-gray-700">Width</label>
+
+                    <input
+                      type="number"
+                      value={imageWidth}
+                      onChange={(e) => setImageWidth(Number(e.target.value))}
+                      className="border border-gray-200 rounded-lg px-3 py-2 w-full text-sm"
+                    />
+                  </div>
+                </div>
+
+                {imageUrl && <img src={imageUrl} className="max-w-xs rounded border" alt="" />}
               </div>
 
               {questionType === 'mcq' && (

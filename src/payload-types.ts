@@ -363,6 +363,16 @@ export interface Question {
         id?: string | null;
       }[]
     | null;
+  images?:
+    | {
+        url: string;
+        placement?: ('auto' | 'right' | 'top' | 'inline') | null;
+        width?: number | null;
+        alt?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  stimulus?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -648,6 +658,16 @@ export interface QuestionsSelect<T extends boolean = true> {
         fixedAt?: T;
         id?: T;
       };
+  images?:
+    | T
+    | {
+        url?: T;
+        placement?: T;
+        width?: T;
+        alt?: T;
+        id?: T;
+      };
+  stimulus?: T;
   updatedAt?: T;
   createdAt?: T;
 }

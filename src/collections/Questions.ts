@@ -235,5 +235,41 @@ export const Questions: CollectionConfig = {
         },
       ],
     },
+
+    {
+      name: 'images',
+      type: 'array',
+      fields: [
+        {
+          name: 'url',
+          type: 'text',
+          required: true,
+        },
+        {
+          name: 'placement',
+          type: 'select',
+          defaultValue: 'auto',
+          options: [
+            { label: 'Auto', value: 'auto' },
+            { label: 'Right', value: 'right' },
+            { label: 'Top', value: 'top' },
+            { label: 'Inline', value: 'inline' },
+          ],
+        },
+        {
+          name: 'width',
+          type: 'number',
+        },
+        {
+          name: 'alt',
+          type: 'text',
+        },
+      ],
+    },
+
+    {
+      name: 'stimulus',
+      type: 'textarea',
+    },
   ],
 }

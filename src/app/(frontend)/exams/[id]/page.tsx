@@ -3,11 +3,9 @@ import { getPayload } from 'payload'
 import ReextractButton from '@/components/exams/ReextractButton'
 import ReactMarkdown from 'react-markdown'
 import remarkMath from 'remark-math'
-import remarkGfm from 'remark-gfm'
 import rehypeKatex from 'rehype-katex'
 import ReviewSuggestionModal from '@/components/questions/ReviewSuggestionModal'
 import EditQuestionModal from '@/components/questions/EditQuestionModal'
-import ReviewQuestionsButton from '@/components/exams/ReviewQuestionsButton'
 import VerifyButton from '@/components/questions/VerifyButton'
 import Link from 'next/link'
 import { ChevronLeft, CheckCircle2, Wrench } from 'lucide-react'
@@ -15,6 +13,7 @@ import QualityIssuesEditor from '@/components/questions/QualityIssuesEditor'
 import FixesLog from '@/components/questions/FixesLog'
 import ExamMetaDataEditor from '@/components/exams/ExamMetaDataEditor'
 import StatusEditor from '@/components/exams/StatusEditor'
+import { QuestionStem } from '@/components/questions/QuestionStem'
 
 export default async function ExamPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -209,14 +208,7 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
                     <QualityIssuesEditor question={question} />
                   </div>
 
-                  <div className="prose max-w-none text-gray-800 text-[15px]">
-                    <ReactMarkdown
-                      remarkPlugins={[remarkMath, remarkGfm]}
-                      rehypePlugins={[rehypeKatex]}
-                    >
-                      {question.questionText}
-                    </ReactMarkdown>
-                  </div>
+                  <QuestionStem question={question} />
                 </div>
               </div>
 

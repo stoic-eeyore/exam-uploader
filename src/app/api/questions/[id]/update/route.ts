@@ -18,6 +18,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       questionText: body.questionText,
       questionType: body.questionType,
       options: body.options,
+      images: body.images,
       editedByHuman: true,
     },
   })
