@@ -1,10 +1,6 @@
 import config from '@payload-config'
 import { getPayload } from 'payload'
 import ReextractButton from '@/components/exams/ReextractButton'
-import ReactMarkdown from 'react-markdown'
-import remarkMath from 'remark-math'
-import remarkGfm from 'remark-gfm'
-import rehypeKatex from 'rehype-katex'
 import ReviewSuggestionModal from '@/components/questions/ReviewSuggestionModal'
 import EditQuestionModal from '@/components/questions/EditQuestionModal'
 import VerifyButton from '@/components/questions/VerifyButton'
@@ -15,6 +11,7 @@ import FixesLog from '@/components/questions/FixesLog'
 import ExamMetaDataEditor from '@/components/exams/ExamMetaDataEditor'
 import StatusEditor from '@/components/exams/StatusEditor'
 import { QuestionStem } from '@/components/questions/QuestionStem'
+import OptionList from '@/components/questions/OptionList'
 
 export default async function ExamPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -214,29 +211,7 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
               </div>
 
               {question.questionType === 'mcq' && question.options && (
-                <div className="grid grid-cols-1 gap-2 pl-[3.25rem] sm:grid-cols-2">
-                  {question.options.map((option: any, index: number) => {
-                    const choiceLetter = String.fromCharCode(65 + index)
-
-                    return (
-                      <div
-                        key={option.id || index}
-                        className="flex items-start gap-2 rounded-md border bg-gray-50/50 p-2 text-[13px] text-gray-600"
-                      >
-                        <span className="font-bold text-gray-400">{choiceLetter}.</span>
-
-                        <div className="flex-1 prose max-w-none text-[13px]">
-                          <ReactMarkdown
-                            remarkPlugins={[remarkMath, remarkGfm]}
-                            rehypePlugins={[rehypeKatex]}
-                          >
-                            {option.text}
-                          </ReactMarkdown>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
+                <OptionList options={question.options} />
               )}
 
               {/* Action Toolbar */}
