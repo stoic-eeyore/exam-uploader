@@ -3,6 +3,7 @@ import { getPayload } from 'payload'
 import ReextractButton from '@/components/exams/ReextractButton'
 import ReactMarkdown from 'react-markdown'
 import remarkMath from 'remark-math'
+import remarkGfm from 'remark-gfm'
 import rehypeKatex from 'rehype-katex'
 import ReviewSuggestionModal from '@/components/questions/ReviewSuggestionModal'
 import EditQuestionModal from '@/components/questions/EditQuestionModal'
@@ -225,7 +226,10 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
                         <span className="font-bold text-gray-400">{choiceLetter}.</span>
 
                         <div className="flex-1 prose max-w-none text-[13px]">
-                          <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeKatex]}>
+                          <ReactMarkdown
+                            remarkPlugins={[remarkMath, remarkGfm]}
+                            rehypePlugins={[rehypeKatex]}
+                          >
                             {option.text}
                           </ReactMarkdown>
                         </div>
