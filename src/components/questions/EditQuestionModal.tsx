@@ -146,8 +146,7 @@ export default function EditQuestionModal({ question }: { question: any }) {
                           className="border border-gray-200 rounded-lg px-3 py-2 w-full text-sm"
                         >
                           <option value="right">Right</option>
-                          <option value="top">Top</option>
-                          <option value="inline">Inline</option>
+                          <option value="auto">Auto</option>
                         </select>
                       </div>
 

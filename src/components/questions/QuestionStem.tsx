@@ -16,7 +16,9 @@ export function QuestionStem({ question }: Props) {
             <Markdown>{question.questionText ?? ''}</Markdown>
           </div>
 
-          {image && <img src={image.url} width={image.width ?? 220} className="shrink-0" />}
+          {image && (
+            <img src={image.url} width={image.width ?? 220} className="shrink-0 max-w-none" />
+          )}
         </div>
       )
 
@@ -24,6 +26,10 @@ export function QuestionStem({ question }: Props) {
       return (
         <div className="prose max-w-none text-gray-800 text-[15px]">
           <Markdown>{question.questionText ?? ''}</Markdown>
+
+          {image && (
+            <img src={image.url} width={image.width ?? 220} className="shrink-0 max-w-none" />
+          )}
         </div>
       )
   }
