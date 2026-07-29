@@ -42,6 +42,6 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({
     success: true,
-    message: JSON.stringify({ analhysis }),
+    message: JSON.stringify({ analysis }),
   })
 }
