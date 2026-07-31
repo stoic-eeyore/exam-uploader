@@ -15,6 +15,7 @@ import { Grades } from './collections/Grades'
 import { Subjects } from './collections/Subjects'
 import { Labels } from './collections/Labels'
 import { Questions } from './collections/Questions'
+import { Stimuli } from './collections/Stimuli'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -36,6 +37,7 @@ export default buildConfig({
     PendingExams,
     GeminiMappings,
     Questions,
+    Stimuli,
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',

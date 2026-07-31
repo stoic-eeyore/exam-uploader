@@ -5,13 +5,14 @@ import ReviewSuggestionModal from '@/components/questions/ReviewSuggestionModal'
 import EditQuestionModal from '@/components/questions/EditQuestionModal'
 import VerifyButton from '@/components/questions/VerifyButton'
 import Link from 'next/link'
-import { ChevronLeft, CheckCircle2, Wrench } from 'lucide-react'
+import { ChevronLeft, CheckCircle2, Wrench, Bug, BookOpen } from 'lucide-react'
 import QualityIssuesEditor from '@/components/questions/QualityIssuesEditor'
 import FixesLog from '@/components/questions/FixesLog'
 import ExamMetaDataEditor from '@/components/exams/ExamMetaDataEditor'
 import StatusEditor from '@/components/exams/StatusEditor'
 import { QuestionStem } from '@/components/questions/QuestionStem'
 import OptionList from '@/components/questions/OptionList'
+import { StimulusContent } from '@/components/questions/StimulusContent'
 
 export default async function ExamPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -38,10 +39,27 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
     sort: ['questionType', 'questionNumber'],
   })
 
+  const stimuli = await payload.find({
+    collection: 'stimuli',
+    where: {
+      exam: {
+        equals: id,
+      },
+    },
+    limit: 100,
+    sort: ['stimulusNumber'],
+  })
+
   const totalQuestions = questions.totalDocs
   const reviewedCount = questions.docs.filter((q: any) => q.status === 'verified').length
   const fixedCount = questions.docs.reduce((sum: number, q: any) => sum + (q.fixes?.length || 0), 0)
   const allReviewed = totalQuestions > 0 && reviewedCount === totalQuestions
+
+  const stimulusMap = new Map<number, any>()
+  for (const stim of stimuli.docs) {
+    stimulusMap.set(stim.id, stim)
+  }
+  const renderedStimuli = new Set<number>()
 
   return (
     <div className="p-6 space-y-6">
@@ -168,6 +186,17 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
           const qualityIssues = question.qualityIssues ?? []
           const isVerified = question.status === 'verified'
 
+          // Render stimulus if this question has one and we haven't shown it yet
+          const stimulusId =
+            typeof question.stimulus === 'number'
+              ? question.stimulus
+              : (question.stimulus as any)?.id
+          const stimulus = stimulusId ? stimulusMap.get(stimulusId) : null
+          const shouldShowStimulus = stimulus && !renderedStimuli.has(stimulus.stimulusNumber)
+          if (shouldShowStimulus) {
+            renderedStimuli.add(stimulus.stimulusNumber)
+          }
+
           return (
             <div
               key={question.id}
@@ -175,6 +204,18 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
                 isVerified ? 'border-l-4 border-l-emerald-500' : 'border-l-4 border-l-transparent'
               }`}
             >
+              {shouldShowStimulus && (
+                <div className="mb-3 p-4 rounded-lg bg-amber-50 border border-amber-200">
+                  <div className="flex items-center gap-2 mb-2">
+                    <BookOpen size={14} className="text-amber-600" />
+                    <span className="text-xs font-semibold text-amber-700 uppercase tracking-wide">
+                      Stimulus {stimulus.stimulusNumber}
+                    </span>
+                  </div>
+                  <StimulusContent content={stimulus.content} images={stimulus.images} />
+                </div>
+              )}
+
               <div className="flex items-start gap-3">
                 <span className="font-bold text-gray-900 min-w-[2.5rem] text-sm">
                   Q{question.questionNumber}
@@ -234,6 +275,21 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
           )
         })}
       </div>
+
+      {/* DEBUG: AI Raw Response — discreet, collapsible */}
+      {exam.aiRawResponse && (
+        <details className="rounded-lg border border-gray-200 bg-gray-50 overflow-hidden">
+          <summary className="flex items-center gap-2 px-4 py-2 text-xs font-medium text-gray-500 hover:bg-gray-100 cursor-pointer select-none">
+            <Bug size={12} />
+            AI Raw Response ({exam.aiRawResponse.length.toLocaleString()} chars)
+          </summary>
+          <div className="border-t border-gray-200">
+            <pre className="p-4 text-xs text-gray-600 overflow-x-auto whitespace-pre-wrap break-all max-h-96 overflow-y-auto font-mono leading-relaxed">
+              {exam.aiRawResponse}
+            </pre>
+          </div>
+        </details>
+      )}
     </div>
   )
 }

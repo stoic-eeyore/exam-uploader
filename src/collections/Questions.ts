@@ -269,7 +269,8 @@ export const Questions: CollectionConfig = {
 
     {
       name: 'stimulus',
-      type: 'textarea',
+      type: 'relationship',
+      relationTo: 'stimuli',
     },
   ],
 }

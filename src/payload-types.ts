@@ -76,6 +76,7 @@ export interface Config {
     'pending-exams': PendingExam;
     'gemini-mappings': GeminiMapping;
     questions: Question;
+    stimuli: Stimulus;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -92,6 +93,7 @@ export interface Config {
     'pending-exams': PendingExamsSelect<false> | PendingExamsSelect<true>;
     'gemini-mappings': GeminiMappingsSelect<false> | GeminiMappingsSelect<true>;
     questions: QuestionsSelect<false> | QuestionsSelect<true>;
+    stimuli: StimuliSelect<false> | StimuliSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -372,7 +374,29 @@ export interface Question {
         id?: string | null;
       }[]
     | null;
-  stimulus?: string | null;
+  stimulus?: (number | null) | Stimulus;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "stimuli".
+ */
+export interface Stimulus {
+  id: number;
+  exam: number | Exam;
+  stimulusNumber: number;
+  content?: string | null;
+  images?:
+    | {
+        url: string;
+        placement?: ('auto' | 'right' | 'top' | 'inline') | null;
+        width?: number | null;
+        alt?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  status?: ('draft' | 'active') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -435,6 +459,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'questions';
         value: number | Question;
+      } | null)
+    | ({
+        relationTo: 'stimuli';
+        value: number | Stimulus;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -668,6 +696,27 @@ export interface QuestionsSelect<T extends boolean = true> {
         id?: T;
       };
   stimulus?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "stimuli_select".
+ */
+export interface StimuliSelect<T extends boolean = true> {
+  exam?: T;
+  stimulusNumber?: T;
+  content?: T;
+  images?:
+    | T
+    | {
+        url?: T;
+        placement?: T;
+        width?: T;
+        alt?: T;
+        id?: T;
+      };
+  status?: T;
   updatedAt?: T;
   createdAt?: T;
 }
