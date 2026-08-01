@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
         },
         {
           aiAnalysis: {
-            not_equals: null,
+            equals: null,
           },
         },
       ],
