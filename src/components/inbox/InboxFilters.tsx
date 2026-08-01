@@ -2,9 +2,9 @@
 
 type Props = {
   search: string
-  statusFilter: 'all' | 'new' | 'processed' | 'archived'
+  statusFilter: 'all' | 'new' | 'verified' | 'processed' | 'archived'
   onSearchChange: (value: string) => void
-  onStatusChange: (value: 'all' | 'new' | 'processed' | 'archived') => void
+  onStatusChange: (value: 'all' | 'new' | 'verified' | 'processed' | 'archived') => void
 }
 
 export default function InboxFilters({
@@ -25,11 +25,14 @@ export default function InboxFilters({
 
       <select
         value={statusFilter}
-        onChange={(e) => onStatusChange(e.target.value as 'all' | 'new' | 'processed' | 'archived')}
+        onChange={(e) =>
+          onStatusChange(e.target.value as 'all' | 'new' | 'verified' | 'processed' | 'archived')
+        }
         className="border border-gray-200 rounded-md px-2.5 py-1 text-xs bg-white"
       >
         <option value="all">All Status</option>
         <option value="new">New</option>
+        <option value="verified">Verified</option>
         <option value="processed">Processed</option>
         <option value="archived">Archived</option>
       </select>

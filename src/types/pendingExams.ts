@@ -3,6 +3,7 @@ export type AIAnalysis = {
   year?: string
   gradeId?: number
   subjectId?: number
+  semester?: string
   confidence?: number
 }
 

@@ -80,12 +80,20 @@ export default function InboxTableRow({
           className={`px-2 py-0.5 rounded-[4px] text-xs font-medium ${
             exam.status === 'processed'
               ? 'bg-[#dcfce7] text-[#166534]'
-              : exam.status === 'archived'
-                ? 'bg-[#f3f4f6] text-[#6b7280]'
-                : 'bg-[#fef3c7] text-[#92400e]'
+              : exam.status === 'verified'
+                ? 'bg-[#dbeafe] text-[#1e40af]'
+                : exam.status === 'archived'
+                  ? 'bg-[#f3f4f6] text-[#6b7280]'
+                  : 'bg-[#fef3c7] text-[#92400e]'
           }`}
         >
-          {exam.status === 'new' ? 'New' : exam.status === 'processed' ? 'Processed' : 'Archived'}
+          {exam.status === 'new'
+            ? 'New'
+            : exam.status === 'verified'
+              ? 'Verified'
+              : exam.status === 'processed'
+                ? 'Processed'
+                : 'Archived'}
         </span>{' '}
       </td>
 

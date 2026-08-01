@@ -234,6 +234,7 @@ export interface Exam {
     | '2017/2018'
     | '2016/2017'
     | '2015/2016';
+  semester?: ('ganjil' | 'genap') | null;
   description?: {
     root: {
       type: string;
@@ -293,7 +294,7 @@ export interface PendingExam {
     | number
     | boolean
     | null;
-  status?: ('new' | 'processed' | 'archived') | null;
+  status?: ('new' | 'verified' | 'processed' | 'archived') | null;
   processed?: boolean | null;
   fileHash?: string | null;
   uploadedBy?: (number | null) | User;
@@ -588,6 +589,7 @@ export interface ExamsSelect<T extends boolean = true> {
   subject?: T;
   label?: T;
   year?: T;
+  semester?: T;
   description?: T;
   driveUrl?: T;
   driveFileId?: T;

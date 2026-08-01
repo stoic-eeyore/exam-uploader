@@ -22,12 +22,13 @@ export default function InboxPage() {
 
   const [search, setSearch] = useState('')
 
-  type StatusFilter = 'all' | 'new' | 'processed' | 'archived'
+  type StatusFilter = 'all' | 'new' | 'verified' | 'processed' | 'archived'
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('new')
 
   const STATUS_FILTERS = {
     all: () => true,
     new: (e: Exam) => e.status === 'new',
+    verified: (e: Exam) => e.status === 'verified',
     processed: (e: Exam) => e.status === 'processed',
     archived: (e: Exam) => e.status === 'archived',
   } as const
@@ -196,6 +197,11 @@ export default function InboxPage() {
             onConverted={(examId) => {
               setRecent((prev) => prev.filter((x) => x.id !== examId))
               showToast('Exam converted successfully', 'success')
+              fetchPendingExams()
+            }}
+            onVerified={(examId) => {
+              showToast('Exam verified successfully', 'success')
+              fetchPendingExams()
             }}
           />
         </div>

@@ -2,6 +2,10 @@ import { BasePayload } from 'payload'
 import { geminiModel } from '@/lib/gemini'
 import { getActiveGeminiFile } from '@/lib/geminiFiles'
 import { extractJson } from '@/utils/json'
+import fs from 'node:fs'
+import path from 'node:path'
+
+const template = fs.readFileSync(path.join(process.cwd(), 'src/prompts/classifyExam.md'), 'utf8')
 
 export async function analyzePendingExam(payload: BasePayload, examId: string) {
   const exam = await payload.findByID({
@@ -39,6 +43,11 @@ export async function analyzePendingExam(payload: BasePayload, examId: string) {
     .map((g: any) => `- ID: ${g.id}, Name: "${g.name}"`)
     .join('\n')
 
+  const prompt = template
+    .replace('{{subjects}}', formattedSubjects)
+    .replace('{{grades}}', formattedGrades)
+  console.log(`[analyzePendingExam] Prompt for exam ${examId}:`, prompt)
+
   console.log(`[analyzePendingExam] Sending request to Gemini for exam ${examId}`)
   const result = await geminiModel.generateContent([
     {
@@ -48,35 +57,7 @@ export async function analyzePendingExam(payload: BasePayload, examId: string) {
       },
     },
     {
-      text: `
-The file included is an exam file.
-
-Can you help determine the following:
-1. What is the subject (look for 'Mata Pelajaran' or similar) of the exam? (e.g. Math, Physics). And the corresponding subject ID.
-2. What is the grade (look for 'Kelas' or similar) of the exam? (e.g. Primary 1 to Primary 6, Secondary 1 to Secondary 6). And the corresponding grade ID.
-Also, 'IV' corresponds to Primary 4, 'VII' corresponds to 'Secondary 1', 'XI' corresponds to Secondary 5, 'XII' corresponds to Secondary 6, and so on.
-3. What is the year (look for 'Tahun Ajaran' or similar) of the exam? (e.g. 2024/2026, 2024/2025, etc.)
-4. What is the label of the exam? (Sumatif 1 to Sumatif 6, Formatif 1 to Formatif 6)
-5. The number of multiple choice questions and the number of essay questions in the exam.
-
-Here is the list of subjects: 
-${formattedSubjects || 'No subjects currently configured.'}
-
-Here is the list of grade levels:
-${formattedGrades || 'No grade levels currently configured.'} 
-
-Return ONLY valid JSON in this format:
-{
-  "subjectName": "string",
-  "subjectId": "integer",
-  "gradeName": "string",
-  "gradeId": "integer",
-  "year": "string",
-  "label": "string",
-  "numberMultipleChoiceQuestions": "integer",
-  "numberEssayQuestions": "integer"
-}
-`,
+      text: prompt,
     },
   ])
 

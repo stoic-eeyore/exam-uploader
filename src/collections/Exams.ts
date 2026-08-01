@@ -68,6 +68,16 @@ export const Exams: CollectionConfig = {
     },
 
     {
+      name: 'semester',
+      type: 'select',
+      options: [
+        { label: 'Ganjil (Odd)', value: 'ganjil' },
+        { label: 'Genap (Even)', value: 'genap' },
+      ],
+      // No defaultValue — leaves it null/undefined when unspecified
+    },
+
+    {
       name: 'description',
       type: 'richText',
     },
