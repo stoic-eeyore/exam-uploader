@@ -17,9 +17,18 @@ export async function GET(req: NextRequest) {
   const result = await payload.find({
     collection: 'pending-exams',
     where: {
-      status: {
-        equals: 'new',
-      },
+      and: [
+        {
+          status: {
+            equals: 'new',
+          },
+        },
+        {
+          aiAnalysis: {
+            not_equals: null,
+          },
+        },
+      ],
     },
     sort: 'createdAt',
     limit: 1,
