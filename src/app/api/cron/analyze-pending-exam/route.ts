@@ -42,6 +42,6 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json({
     success: true,
-    message: JSON.stringify({ analysis }),
+    message: `Analyzed pending exam with ID: ${exam.id}`,
   })
 }

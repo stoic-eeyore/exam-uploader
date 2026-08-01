@@ -46,7 +46,6 @@ export async function analyzePendingExam(payload: BasePayload, examId: string) {
   const prompt = template
     .replace('{{subjects}}', formattedSubjects)
     .replace('{{grades}}', formattedGrades)
-  console.log(`[analyzePendingExam] Prompt for exam ${examId}:`, prompt)
 
   console.log(`[analyzePendingExam] Sending request to Gemini for exam ${examId}`)
   const result = await geminiModel.generateContent([
