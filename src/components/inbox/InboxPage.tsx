@@ -22,7 +22,7 @@ export default function InboxPage() {
 
   const [search, setSearch] = useState('')
 
-  type StatusFilter = 'all' | 'new' | 'verified' | 'processed' | 'archived'
+  type StatusFilter = 'all' | 'new' | 'verified' | 'processed' | 'archived' | 'failed'
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('new')
 
   const STATUS_FILTERS = {
@@ -31,6 +31,7 @@ export default function InboxPage() {
     verified: (e: Exam) => e.status === 'verified',
     processed: (e: Exam) => e.status === 'processed',
     archived: (e: Exam) => e.status === 'archived',
+    failed: (e: Exam) => e.status === 'failed',
   } as const
 
   const showToast = useCallback((message: string, type: 'success' | 'error') => {

@@ -2,9 +2,9 @@
 
 type Props = {
   search: string
-  statusFilter: 'all' | 'new' | 'verified' | 'processed' | 'archived'
+  statusFilter: 'all' | 'new' | 'verified' | 'processed' | 'archived' | 'failed'
   onSearchChange: (value: string) => void
-  onStatusChange: (value: 'all' | 'new' | 'verified' | 'processed' | 'archived') => void
+  onStatusChange: (value: 'all' | 'new' | 'verified' | 'processed' | 'archived' | 'failed') => void
 }
 
 export default function InboxFilters({

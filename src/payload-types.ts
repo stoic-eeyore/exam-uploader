@@ -294,7 +294,7 @@ export interface PendingExam {
     | number
     | boolean
     | null;
-  status?: ('new' | 'verified' | 'processed' | 'archived') | null;
+  status?: ('new' | 'verified' | 'processed' | 'archived' | 'failed') | null;
   processed?: boolean | null;
   fileHash?: string | null;
   uploadedBy?: (number | null) | User;

@@ -62,6 +62,7 @@ export const PendingExams: CollectionConfig = {
         { label: 'Verified', value: 'verified' },
         { label: 'Processed', value: 'processed' },
         { label: 'Archived', value: 'archived' },
+        { label: 'Failed', value: 'failed' },
       ],
     },
 
