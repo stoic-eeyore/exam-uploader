@@ -47,14 +47,14 @@ export const Questions: CollectionConfig = {
       name: 'grade',
       type: 'relationship',
       relationTo: 'grades',
-      required: true,
+      required: false,
     },
 
     {
       name: 'subject',
       type: 'relationship',
       relationTo: 'subjects',
-      required: true,
+      required: false,
     },
 
     {
