@@ -326,6 +326,7 @@ export interface Question {
   questionNumber?: number | null;
   grade: number | Grade;
   subject: number | Subject;
+  origin?: ('uploaded' | 'manual' | 'ai') | null;
   questionType?: ('mcq' | 'essay') | null;
   questionText?: string | null;
   options?:
@@ -650,6 +651,7 @@ export interface QuestionsSelect<T extends boolean = true> {
   questionNumber?: T;
   grade?: T;
   subject?: T;
+  origin?: T;
   questionType?: T;
   questionText?: T;
   options?:
