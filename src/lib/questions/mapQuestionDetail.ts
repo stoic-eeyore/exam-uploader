@@ -62,5 +62,7 @@ export function mapQuestionDetail(question: Question): QuestionDetail {
       })) ?? [],
 
     examTitle: exam?.title ?? '',
+
+    examId: typeof question.exam === 'object' ? question.exam.id : question.exam,
   }
 }

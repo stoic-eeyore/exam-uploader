@@ -81,4 +81,24 @@ export interface QuestionDetail {
   }[]
 
   examTitle: string
+
+  examId: number
+}
+
+export interface QuestionFormData {
+  exam: number
+
+  questionNumber: number
+
+  questionType: 'mcq' | 'essay'
+
+  questionText: string
+
+  options: {
+    text: string
+  }[]
+
+  answer: string
+
+  explanation: string
 }

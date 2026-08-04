@@ -1,12 +1,21 @@
 'use client'
 
 import { useState } from 'react'
-import { Pencil, X, Loader2, Trash2, Plus } from 'lucide-react'
+import { Pencil, X, Loader2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+import QuestionOptionsEditor from './QuestionOptionsEditor'
+import QuestionImageEditor from './QuestionImageEditor'
+import type { QuestionDetail } from '@/lib/questions/types'
+import { updateQuestionApi } from '@/lib/questions/updateQuestionApi'
 
-export default function EditQuestionModal({ question }: { question: any }) {
+interface Props {
+  question: QuestionDetail
+}
+
+export default function EditQuestionModal({ question }: Props) {
   const [open, setOpen] = useState(false)
   const [options, setOptions] = useState(question.options || [])
-  const [questionText, setQuestionText] = useState(question.questionText)
+  const [questionText, setQuestionText] = useState(question.questionText ?? '')
   const [questionType, setQuestionType] = useState(question.questionType)
   const [imageUrl, setImageUrl] = useState(question.images?.[0]?.url ?? '')
   const [imagePlacement, setImagePlacement] = useState(question.images?.[0]?.placement ?? 'right')
@@ -14,34 +23,34 @@ export default function EditQuestionModal({ question }: { question: any }) {
   const [hasImage, setHasImage] = useState(question.images?.length > 0)
   const [saving, setSaving] = useState(false)
 
+  const router = useRouter()
+
   async function handleSave() {
     setSaving(true)
     try {
-      await fetch(`/api/questions/${question.id}/update`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          questionText,
-          questionType,
-          options,
+      const images =
+        hasImage && imageUrl
+          ? [
+              {
+                url: imageUrl,
+                placement: imagePlacement,
+                width: imageWidth,
+              },
+            ]
+          : []
 
-          images:
-            hasImage && imageUrl
-              ? [
-                  {
-                    url: imageUrl,
-                    placement: imagePlacement,
-                    width: imageWidth,
-                  },
-                ]
-              : [],
-        }),
+      await updateQuestionApi(question.id, {
+        questionText,
+        questionType,
+        options,
+        images,
       })
-      window.location.reload()
+
+      setOpen(false)
+      router.refresh()
     } catch (err) {
       console.error('Failed to save:', err)
+    } finally {
       setSaving(false)
     }
   }
@@ -82,7 +91,7 @@ export default function EditQuestionModal({ question }: { question: any }) {
                 </label>
                 <select
                   value={questionType}
-                  onChange={(e) => setQuestionType(e.target.value)}
+                  onChange={(e) => setQuestionType(e.target.value as 'mcq' | 'essay')}
                   className="border border-gray-200 rounded-lg px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                 >
                   <option value="mcq">Multiple Choice</option>
@@ -102,119 +111,19 @@ export default function EditQuestionModal({ question }: { question: any }) {
                 />
               </div>
 
-              <div className="rounded-lg border border-gray-200">
-                <button
-                  type="button"
-                  onClick={() => setHasImage(!hasImage)}
-                  className="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition"
-                >
-                  <div>
-                    <h3 className="font-medium text-gray-900">Image</h3>
-                    <p className="text-xs text-gray-500">
-                      {hasImage ? 'Image enabled' : 'No image'}
-                    </p>
-                  </div>
-
-                  <div className="text-2xl text-gray-400">{hasImage ? '−' : '+'}</div>
-                </button>
-
-                {hasImage && (
-                  <div className="border-t border-gray-200 p-4 space-y-4">
-                    <div>
-                      <label className="block mb-1.5 text-sm font-medium text-gray-700">
-                        Image URL
-                      </label>
-
-                      <input
-                        type="text"
-                        value={imageUrl}
-                        onChange={(e) => setImageUrl(e.target.value)}
-                        placeholder="https://..."
-                        className="border border-gray-200 rounded-lg px-3 py-2 w-full text-sm"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block mb-1.5 text-sm font-medium text-gray-700">
-                          Placement
-                        </label>
-
-                        <select
-                          value={imagePlacement}
-                          onChange={(e) => setImagePlacement(e.target.value)}
-                          className="border border-gray-200 rounded-lg px-3 py-2 w-full text-sm"
-                        >
-                          <option value="right">Right</option>
-                          <option value="auto">Auto</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="block mb-1.5 text-sm font-medium text-gray-700">
-                          Width
-                        </label>
-
-                        <input
-                          type="number"
-                          value={imageWidth}
-                          onChange={(e) => setImageWidth(Number(e.target.value))}
-                          className="border border-gray-200 rounded-lg px-3 py-2 w-full text-sm"
-                        />
-                      </div>
-                    </div>
-
-                    {imageUrl && <img src={imageUrl} className="max-w-xs rounded border" alt="" />}
-                  </div>
-                )}
-              </div>
+              <QuestionImageEditor
+                hasImage={hasImage}
+                setHasImage={setHasImage}
+                imageUrl={imageUrl}
+                setImageUrl={setImageUrl}
+                imagePlacement={imagePlacement}
+                setImagePlacement={setImagePlacement}
+                imageWidth={imageWidth}
+                setImageWidth={setImageWidth}
+              />
 
               {questionType === 'mcq' && (
-                <div>
-                  <label className="block mb-3 text-sm font-medium text-gray-700">Options</label>
-
-                  <div className="space-y-3">
-                    {options.map((option: any, index: number) => (
-                      <div key={index} className="flex gap-3 items-start">
-                        <div className="w-8 pt-2.5 text-sm font-bold text-gray-400">
-                          {String.fromCharCode(65 + index)}
-                        </div>
-
-                        <textarea
-                          value={option.text}
-                          onChange={(e) => {
-                            const updated = [...options]
-                            updated[index] = { ...updated[index], text: e.target.value }
-                            setOptions(updated)
-                          }}
-                          rows={3}
-                          className="border border-gray-200 rounded-lg px-3 py-2 flex-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-y"
-                        />
-
-                        <button
-                          type="button"
-                          onClick={() => {
-                            const updated = options.filter((_: any, i: number) => i !== index)
-                            setOptions(updated)
-                          }}
-                          className="mt-2 p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-md transition"
-                          title="Remove option"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => setOptions([...options, { text: '' }])}
-                    className="mt-4 inline-flex items-center gap-1.5 rounded-lg border border-dashed border-gray-300 px-4 py-2 text-sm text-gray-500 hover:border-gray-400 hover:text-gray-700 hover:bg-gray-50 transition"
-                  >
-                    <Plus size={14} />
-                    Add Option
-                  </button>
-                </div>
+                <QuestionOptionsEditor options={options} onChange={setOptions} />
               )}
             </div>
 
