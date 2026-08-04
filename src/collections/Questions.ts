@@ -34,13 +34,47 @@ export const Questions: CollectionConfig = {
       name: 'exam',
       type: 'relationship',
       relationTo: 'exams',
-      required: true,
+      required: false,
     },
 
     {
       name: 'questionNumber',
       type: 'number',
+      required: false,
+    },
+
+    {
+      name: 'grade',
+      type: 'relationship',
+      relationTo: 'grades',
       required: true,
+    },
+
+    {
+      name: 'subject',
+      type: 'relationship',
+      relationTo: 'subjects',
+      required: true,
+    },
+
+    {
+      name: 'origin',
+      type: 'select',
+      defaultValue: 'uploaded',
+      options: [
+        {
+          label: 'Uploaded',
+          value: 'uploaded',
+        },
+        {
+          label: 'Manual',
+          value: 'manual',
+        },
+        {
+          label: 'AI',
+          value: 'ai',
+        },
+      ],
     },
 
     {

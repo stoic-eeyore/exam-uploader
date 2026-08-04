@@ -322,8 +322,10 @@ export interface GeminiMapping {
  */
 export interface Question {
   id: number;
-  exam: number | Exam;
-  questionNumber: number;
+  exam?: (number | null) | Exam;
+  questionNumber?: number | null;
+  grade: number | Grade;
+  subject: number | Subject;
   questionType?: ('mcq' | 'essay') | null;
   questionText?: string | null;
   options?:
@@ -646,6 +648,8 @@ export interface GeminiMappingsSelect<T extends boolean = true> {
 export interface QuestionsSelect<T extends boolean = true> {
   exam?: T;
   questionNumber?: T;
+  grade?: T;
+  subject?: T;
   questionType?: T;
   questionText?: T;
   options?:
