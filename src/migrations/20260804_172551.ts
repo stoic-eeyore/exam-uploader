@@ -5,8 +5,8 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
    CREATE TYPE "public"."enum_questions_origin" AS ENUM('uploaded', 'manual', 'ai');
   ALTER TABLE "questions" ALTER COLUMN "exam_id" DROP NOT NULL;
   ALTER TABLE "questions" ALTER COLUMN "question_number" DROP NOT NULL;
-  ALTER TABLE "questions" ADD COLUMN "grade_id" integer NOT NULL;
-  ALTER TABLE "questions" ADD COLUMN "subject_id" integer NOT NULL;
+  ALTER TABLE "questions" ADD COLUMN "grade_id" integer;
+  ALTER TABLE "questions" ADD COLUMN "subject_id" integer;
   ALTER TABLE "questions" ADD COLUMN "origin" "enum_questions_origin" DEFAULT 'uploaded';
   ALTER TABLE "questions" ADD CONSTRAINT "questions_grade_id_grades_id_fk" FOREIGN KEY ("grade_id") REFERENCES "public"."grades"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "questions" ADD CONSTRAINT "questions_subject_id_subjects_id_fk" FOREIGN KEY ("subject_id") REFERENCES "public"."subjects"("id") ON DELETE set null ON UPDATE no action;
