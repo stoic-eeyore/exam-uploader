@@ -3,48 +3,44 @@
 import { useState } from 'react'
 import { Pencil, X, Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import QuestionOptionsEditor from './QuestionOptionsEditor'
-import QuestionImageEditor from './QuestionImageEditor'
-import type { QuestionDetail } from '@/lib/questions/types'
+import type { EditableQuestion, QuestionDetail, QuestionFormData } from '@/lib/questions/types'
 import { updateQuestionApi } from '@/lib/questions/updateQuestionApi'
+import { relationshipId } from '@/lib/payload/relationshipId'
+import { QuestionForm } from '@/app/(frontend)/dashboard/questions/components/form/QuestionForm'
+import { Grade, Question, Subject } from '@/payload-types'
+import { getQuestionApi } from '@/lib/questions/getQuestionApi'
 
 interface Props {
-  question: QuestionDetail
+  questionId: number
+
+  grades: Grade[]
+  subjects: Subject[]
 }
 
-export default function EditQuestionModal({ question }: Props) {
+export default function EditQuestionModal({ questionId, grades, subjects }: Props) {
+  const [question, setQuestion] = useState<Question | null>(null)
+  const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState(false)
-  const [options, setOptions] = useState(question.options || [])
-  const [questionText, setQuestionText] = useState(question.questionText ?? '')
-  const [questionType, setQuestionType] = useState(question.questionType)
-  const [imageUrl, setImageUrl] = useState(question.images?.[0]?.url ?? '')
-  const [imagePlacement, setImagePlacement] = useState(question.images?.[0]?.placement ?? 'right')
-  const [imageWidth, setImageWidth] = useState(question.images?.[0]?.width ?? 220)
-  const [hasImage, setHasImage] = useState(question.images?.length > 0)
   const [saving, setSaving] = useState(false)
-
   const router = useRouter()
 
-  async function handleSave() {
+  async function handleOpen() {
+    setQuestion(null)
+    setOpen(true)
+    setLoading(true)
+
+    try {
+      const question = await getQuestionApi(questionId)
+      setQuestion(question)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handleSave(data: QuestionFormData) {
     setSaving(true)
     try {
-      const images =
-        hasImage && imageUrl
-          ? [
-              {
-                url: imageUrl,
-                placement: imagePlacement,
-                width: imageWidth,
-              },
-            ]
-          : []
-
-      await updateQuestionApi(question.id, {
-        questionText,
-        questionType,
-        options,
-        images,
-      })
+      await updateQuestionApi(questionId, data)
 
       setOpen(false)
       router.refresh()
@@ -58,7 +54,7 @@ export default function EditQuestionModal({ question }: Props) {
   return (
     <>
       <button
-        onClick={() => setOpen(true)}
+        onClick={handleOpen}
         className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium bg-white text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all disabled:opacity-50"
       >
         <Pencil size={14} />
@@ -85,64 +81,38 @@ export default function EditQuestionModal({ question }: Props) {
             </div>
 
             <div className="space-y-5">
-              <div>
-                <label className="block mb-1.5 text-sm font-medium text-gray-700">
-                  Question Type
-                </label>
-                <select
-                  value={questionType}
-                  onChange={(e) => setQuestionType(e.target.value as 'mcq' | 'essay')}
-                  className="border border-gray-200 rounded-lg px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                >
-                  <option value="mcq">Multiple Choice</option>
-                  <option value="essay">Essay</option>
-                </select>
-              </div>
+              {loading ? (
+                <div className="flex justify-center py-12">
+                  <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+                </div>
+              ) : question ? (
+                <QuestionForm
+                  initialData={{
+                    grade: relationshipId(question.grade) ?? null,
+                    subject: relationshipId(question.subject) ?? null,
 
-              <div>
-                <label className="block mb-1.5 text-sm font-medium text-gray-700">
-                  Question Text
-                </label>
-                <textarea
-                  value={questionText}
-                  onChange={(e) => setQuestionText(e.target.value)}
-                  rows={8}
-                  className="border border-gray-200 rounded-lg px-3 py-2 w-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-y"
+                    questionType: question.questionType ?? 'essay',
+
+                    questionText: question.questionText ?? '',
+
+                    options: (question.options ?? []).map((option) => ({
+                      text: option.text ?? null,
+                    })),
+
+                    images: (question.images ?? []).map((image) => ({
+                      url: image.url,
+                      placement: image.placement ?? 'right',
+                      width: image.width ?? 220,
+                      alt: image.alt ?? null,
+                    })),
+                  }}
+                  grades={grades}
+                  subjects={subjects}
+                  onSave={handleSave}
                 />
-              </div>
-
-              <QuestionImageEditor
-                hasImage={hasImage}
-                setHasImage={setHasImage}
-                imageUrl={imageUrl}
-                setImageUrl={setImageUrl}
-                imagePlacement={imagePlacement}
-                setImagePlacement={setImagePlacement}
-                imageWidth={imageWidth}
-                setImageWidth={setImageWidth}
-              />
-
-              {questionType === 'mcq' && (
-                <QuestionOptionsEditor options={options} onChange={setOptions} />
+              ) : (
+                <div className="text-center py-8 text-gray-500">Failed to load question.</div>
               )}
-            </div>
-
-            <div className="mt-8 flex gap-3 justify-end pt-4 border-t border-gray-100">
-              <button
-                onClick={() => setOpen(false)}
-                className="rounded-lg border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 transition"
-              >
-                Cancel
-              </button>
-
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {saving && <Loader2 size={14} className="animate-spin" />}
-                {saving ? 'Saving...' : 'Save Changes'}
-              </button>
             </div>
           </div>
         </div>

@@ -3,6 +3,7 @@ import { getPayload } from 'payload'
 import { getActiveGeminiFile } from './geminiFiles'
 import { extractJson } from '@/utils/json'
 import { geminiModel } from '@/lib/gemini'
+import { relationshipId } from './payload/relationshipId'
 
 export async function extractExamQuestions(examId: string) {
   const payload = await getPayload({
@@ -63,10 +64,17 @@ export async function extractExamQuestions(examId: string) {
         ? (stimulusIdMap.get(question.stimulusNumber) ?? null)
         : null
 
+      // const grade = typeof exam.grade === 'object' ? exam.grade.id : exam.grade
+
+      // const subject = typeof exam.subject === 'object' ? exam.subject.id : exam.subject
+
       await payload.create({
         collection: 'questions',
         data: {
           exam: exam.id,
+          grade: relationshipId(exam.grade),
+          subject: relationshipId(exam.subject),
+          origin: 'uploaded',
           stimulus: stimulusId, // now a relationship, not text
           questionNumber: question.questionNumber,
           questionType: question.questionType,

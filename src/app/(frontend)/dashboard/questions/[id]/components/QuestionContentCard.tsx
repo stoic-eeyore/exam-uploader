@@ -1,13 +1,20 @@
 import type { QuestionDetail } from '@/lib/questions/types'
+import { Grade, Subject } from '@/payload-types'
+import EditQuestionModal from '@/components/questions/EditQuestionModal'
 
 interface Props {
   question: QuestionDetail
+
+  grades: Grade[]
+  subjects: Subject[]
 }
 
-export function QuestionContentCard({ question }: Props) {
+export function QuestionContentCard({ question, grades, subjects }: Props) {
   return (
     <div className="rounded-lg border bg-card p-6">
       <h2 className="mb-4 text-lg font-semibold">Question</h2>
+
+      <EditQuestionModal question={question} grades={grades} subjects={subjects} />
 
       <p className="whitespace-pre-wrap">{question.questionText}</p>
 

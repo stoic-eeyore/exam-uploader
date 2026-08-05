@@ -1,3 +1,5 @@
+import type { Question } from '@/payload-types'
+
 export type CognitiveLevel = 'recall' | 'understanding' | 'hots'
 
 export interface QuestionListItem {
@@ -8,6 +10,7 @@ export interface QuestionListItem {
   questionType: 'mcq' | 'essay'
 
   examTitle: string
+  examDriveUrl: string
   subjectName: string
   gradeName: string
 
@@ -29,10 +32,13 @@ export interface QuestionListResponse {
   }
 }
 
-export interface QuestionDetail {
+export interface QuestionDetail extends EditableQuestion {
   id: number
 
-  questionNumber: number
+  grade: number | null
+  subject: number | null
+
+  questionNumber: number | null
   questionType: 'mcq' | 'essay'
 
   questionText: string | null
@@ -47,10 +53,21 @@ export interface QuestionDetail {
 
   images: {
     url: string
-    placement: 'auto' | 'right' | 'top' | 'inline'
-    width?: number | null
-    alt?: string | null
+    placement: ImagePlacement
+    width: number | null
+    // alt?: string | null
   }[]
+
+  stimulus: {
+    id: number
+    content: string | null
+    images: {
+      url: string
+      placement: ImagePlacement
+      width: number | null
+      alt: string | null
+    }[]
+  } | null
 
   reviewedByAI: boolean
 
@@ -80,25 +97,35 @@ export interface QuestionDetail {
     fixedAt: string | null
   }[]
 
-  examTitle: string
-
-  examId: number
+  examTitle: string | null
+  examId: number | null
 }
 
-export interface QuestionFormData {
-  exam: number
+export type ImagePlacement = 'auto' | 'right' | 'top' | 'inline'
 
-  questionNumber: number
+export interface QuestionFormData {
+  grade: number | null
+  subject: number | null
 
   questionType: 'mcq' | 'essay'
 
   questionText: string
 
   options: {
-    text: string
+    text: string | null
   }[]
 
-  answer: string
-
-  explanation: string
+  images: {
+    url: string
+    placement: ImagePlacement
+    width: number
+    // alt: string | null
+  }[]
 }
+
+import type { Grade, Subject } from '@/payload-types'
+
+export type EditableQuestion = Pick<
+  Question,
+  'id' | 'grade' | 'subject' | 'questionType' | 'questionText' | 'options' | 'images'
+>

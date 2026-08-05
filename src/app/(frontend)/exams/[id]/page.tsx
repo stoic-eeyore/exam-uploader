@@ -50,6 +50,17 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
     sort: ['stimulusNumber'],
   })
 
+  const [grades, subjects] = await Promise.all([
+    payload.find({
+      collection: 'grades',
+      limit: 100,
+    }),
+    payload.find({
+      collection: 'subjects',
+      limit: 100,
+    }),
+  ])
+
   const totalQuestions = questions.totalDocs
   const reviewedCount = questions.docs.filter((q: any) => q.status === 'verified').length
   const fixedCount = questions.docs.reduce((sum: number, q: any) => sum + (q.fixes?.length || 0), 0)
@@ -260,7 +271,12 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
                 <div className="inline-flex rounded-md border border-gray-200">
                   <VerifyButton question={question} />
                   <div className="w-px bg-gray-200" />
-                  <EditQuestionModal question={question} />
+                  <EditQuestionModal
+                    questionId={question.id}
+                    grades={grades.docs}
+                    subjects={subjects.docs}
+                  />
+
                   <div className="w-px bg-gray-200" />
                   <ReextractButton questionId={question.id} />
                 </div>

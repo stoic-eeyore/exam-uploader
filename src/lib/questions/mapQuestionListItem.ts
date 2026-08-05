@@ -10,24 +10,24 @@ function truncate(text: string | null | undefined, max = 140) {
 export function mapQuestionListItem(question: Question): QuestionListItem {
   const exam = typeof question.exam === 'object' ? question.exam : undefined
 
-  const subject = exam && typeof exam.subject === 'object' ? exam.subject : undefined
-
-  const grade = exam && typeof exam.grade === 'object' ? exam.grade : undefined
+  const subjectName = typeof question.subject === 'object' ? question.subject?.name : undefined
+  const gradeName = typeof question.grade === 'object' ? question.grade?.name : undefined
 
   return {
     id: question.id,
 
-    questionNumber: question.questionNumber,
+    questionNumber: question.questionNumber ?? 0,
 
     questionText: truncate(question.questionText),
 
     questionType: question.questionType ?? 'essay',
 
-    examTitle: exam?.title ?? 'Unknown Exam',
+    examTitle: exam?.title ?? '',
+    examDriveUrl: exam?.driveUrl ?? '',
 
-    subjectName: subject?.name ?? 'Unknown',
+    subjectName: subjectName ?? 'Unknown',
 
-    gradeName: grade?.name ?? 'Unknown',
+    gradeName: gradeName ?? 'Unknown',
 
     reviewedByAI: question.reviewedByAI ?? false,
 

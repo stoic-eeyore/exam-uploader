@@ -7,14 +7,8 @@ interface Props {
 export function StatusBadges({ question }: Props) {
   return (
     <div className="flex flex-col items-end gap-2 text-sm">
-      <span className="rounded-full border px-2 py-1">
-        {question.reviewedByAI ? 'AI Reviewed' : 'AI Pending'}
-      </span>
-
-      <span className="rounded-full border px-2 py-1 capitalize">{question.status}</span>
-
       {question.cognitiveLevel && (
-        <span className="rounded-full border px-2 py-1 capitalize">{question.cognitiveLevel}</span>
+        <span className="rounded bg-blue-100 px-2 py-1 text-xs">{question.cognitiveLevel}</span>
       )}
     </div>
   )

@@ -324,8 +324,8 @@ export interface Question {
   id: number;
   exam?: (number | null) | Exam;
   questionNumber?: number | null;
-  grade: number | Grade;
-  subject: number | Subject;
+  grade?: (number | null) | Grade;
+  subject?: (number | null) | Subject;
   origin?: ('uploaded' | 'manual' | 'ai') | null;
   questionType?: ('mcq' | 'essay') | null;
   questionText?: string | null;

@@ -1,5 +1,6 @@
 import type { Question } from '@/payload-types'
 import type { QuestionDetail } from './types'
+import { relationshipId } from '@/lib/payload/relationshipId'
 
 export function mapQuestionDetail(question: Question): QuestionDetail {
   const exam = typeof question.exam === 'object' ? question.exam : undefined
@@ -7,7 +8,10 @@ export function mapQuestionDetail(question: Question): QuestionDetail {
   return {
     id: question.id,
 
-    questionNumber: question.questionNumber,
+    grade: relationshipId(question.grade) ?? null,
+    subject: relationshipId(question.subject) ?? null,
+
+    questionNumber: question.questionNumber || null,
 
     questionType: question.questionType || 'essay',
 
@@ -29,6 +33,23 @@ export function mapQuestionDetail(question: Question): QuestionDetail {
         width: img.width ?? null,
         alt: img.alt || null,
       })) ?? [],
+
+    stimulus:
+      question.stimulus && typeof question.stimulus === 'object'
+        ? {
+            id: question.stimulus.id,
+
+            content: question.stimulus.content ?? null,
+
+            images:
+              question.stimulus.images?.map((img) => ({
+                url: img.url,
+                placement: img.placement ?? 'auto',
+                width: img.width ?? null,
+                alt: img.alt ?? null,
+              })) ?? [],
+          }
+        : null,
 
     reviewedByAI: question.reviewedByAI ?? false,
 
@@ -63,6 +84,6 @@ export function mapQuestionDetail(question: Question): QuestionDetail {
 
     examTitle: exam?.title ?? '',
 
-    examId: typeof question.exam === 'object' ? question.exam.id : question.exam,
+    examId: relationshipId(question.exam) ?? null,
   }
 }
