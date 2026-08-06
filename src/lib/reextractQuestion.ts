@@ -21,6 +21,9 @@ export async function reextractQuestion(questionId: string, instructions: string
   const examId =
     typeof question.exam === 'object' && question.exam !== null ? question.exam.id : question.exam
 
+  if (!examId) {
+    throw new Error('Question does not have an associated exam')
+  }
   const exam = await payload.findByID({
     collection: 'exams',
     id: examId,

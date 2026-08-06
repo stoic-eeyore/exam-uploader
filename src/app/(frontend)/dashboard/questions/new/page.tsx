@@ -46,7 +46,7 @@ export default async function NewQuestionPage() {
           'use server'
 
           const question = await createQuestion(data)
-          redirect(`/dashboard/questions/${question.id}`)
+          redirect(`/dashboard/questions`)
         }}
       />
     </div>
