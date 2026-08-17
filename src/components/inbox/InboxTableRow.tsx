@@ -12,6 +12,29 @@ type Props = {
   isArchiving: boolean
 }
 
+const statusConfig = {
+  new: {
+    label: 'New',
+    className: 'bg-[#fef3c7] text-[#92400e]',
+  },
+  verified: {
+    label: 'Verified',
+    className: 'bg-[#dbeafe] text-[#1e40af]',
+  },
+  processed: {
+    label: 'Processed',
+    className: 'bg-[#dcfce7] text-[#166534]',
+  },
+  archived: {
+    label: 'Archived',
+    className: 'bg-[#f3f4f6] text-[#6b7280]',
+  },
+  failed: {
+    label: 'Failed',
+    className: 'bg-[#fee2e2] text-[#991b1b]',
+  },
+} satisfies Record<Exam['status'], { label: string; className: string }>
+
 function timeAgo(dateString: string | Date): string {
   const date = new Date(dateString)
   const now = new Date()
@@ -78,23 +101,11 @@ export default function InboxTableRow({
       <td className="py-3 text-sm">
         <span
           className={`px-2 py-0.5 rounded-[4px] text-xs font-medium ${
-            exam.status === 'processed'
-              ? 'bg-[#dcfce7] text-[#166534]'
-              : exam.status === 'verified'
-                ? 'bg-[#dbeafe] text-[#1e40af]'
-                : exam.status === 'archived'
-                  ? 'bg-[#f3f4f6] text-[#6b7280]'
-                  : 'bg-[#fef3c7] text-[#92400e]'
+            statusConfig[exam.status].className
           }`}
         >
-          {exam.status === 'new'
-            ? 'New'
-            : exam.status === 'verified'
-              ? 'Verified'
-              : exam.status === 'processed'
-                ? 'Processed'
-                : 'Archived'}
-        </span>{' '}
+          {statusConfig[exam.status].label}
+        </span>
       </td>
 
       <td className="py-3 text-sm text-[#374151]">

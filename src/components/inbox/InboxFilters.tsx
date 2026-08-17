@@ -26,7 +26,9 @@ export default function InboxFilters({
       <select
         value={statusFilter}
         onChange={(e) =>
-          onStatusChange(e.target.value as 'all' | 'new' | 'verified' | 'processed' | 'archived')
+          onStatusChange(
+            e.target.value as 'all' | 'new' | 'verified' | 'processed' | 'archived' | 'failed',
+          )
         }
         className="border border-gray-200 rounded-md px-2.5 py-1 text-xs bg-white"
       >
@@ -35,6 +37,7 @@ export default function InboxFilters({
         <option value="verified">Verified</option>
         <option value="processed">Processed</option>
         <option value="archived">Archived</option>
+        <option value="failed">Failed</option>
       </select>
     </div>
   )

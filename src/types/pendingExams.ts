@@ -7,10 +7,12 @@ export type AIAnalysis = {
   confidence?: number
 }
 
+export type ExamStatus = 'new' | 'verified' | 'processed' | 'archived' | 'failed'
+
 export type Exam = {
   id: number
   filename: string
-  status: string
+  status: ExamStatus
   processed: boolean
   filesize?: number
   uploadedAt?: string
