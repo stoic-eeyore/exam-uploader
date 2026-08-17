@@ -40,7 +40,7 @@ export default function InboxPage() {
       })
 
       if (status !== 'all') {
-        params.set('status', status)
+        params.set('where[status][equals]', status)
       }
 
       const res = await fetch(`/api/pending-exams?${params.toString()}`)
