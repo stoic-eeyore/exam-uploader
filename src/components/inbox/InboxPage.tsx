@@ -25,24 +25,28 @@ export default function InboxPage() {
   type StatusFilter = 'all' | 'new' | 'verified' | 'processed' | 'archived' | 'failed'
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('new')
 
-  const STATUS_FILTERS = {
-    all: () => true,
-    new: (e: Exam) => e.status === 'new',
-    verified: (e: Exam) => e.status === 'verified',
-    processed: (e: Exam) => e.status === 'processed',
-    archived: (e: Exam) => e.status === 'archived',
-    failed: (e: Exam) => e.status === 'failed',
-  } as const
-
   const showToast = useCallback((message: string, type: 'success' | 'error') => {
     setToast({ message, type })
     setTimeout(() => setToast(null), 4000)
   }, [])
 
-  const fetchPendingExams = async () => {
+  const fetchPendingExams = async (status: StatusFilter = statusFilter) => {
     try {
-      const res = await fetch('/api/pending-exams?sort=-updatedAt&limit=100')
+      setLoading(true)
+
+      const params = new URLSearchParams({
+        sort: '-updatedAt',
+        limit: '100',
+      })
+
+      if (status !== 'all') {
+        params.set('status', status)
+      }
+
+      const res = await fetch(`/api/pending-exams?${params.toString()}`)
+
       if (!res.ok) throw new Error(`Failed to fetch: ${res.status}`)
+
       const data = await res.json()
       setRecent(data.docs || [])
     } catch (err) {
@@ -55,8 +59,8 @@ export default function InboxPage() {
   }
 
   useEffect(() => {
-    fetchPendingExams()
-  }, [])
+    fetchPendingExams(statusFilter)
+  }, [statusFilter])
 
   const handleSync = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -144,11 +148,9 @@ export default function InboxPage() {
     }
   }
 
-  const filteredExams = recent.filter((exam) => {
-    const matchesSearch = exam.filename.toLowerCase().includes(search.toLowerCase())
-    const matchesStatus = STATUS_FILTERS[statusFilter](exam)
-    return matchesSearch && matchesStatus
-  })
+  const filteredExams = recent.filter((exam) =>
+    exam.filename.toLowerCase().includes(search.toLowerCase()),
+  )
 
   return (
     <div className="min-h-screen bg-[#f9fafb] p-5 font-sans">
