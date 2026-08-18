@@ -13,6 +13,7 @@ import StatusEditor from '@/components/exams/StatusEditor'
 import { QuestionStem } from '@/components/questions/QuestionStem'
 import OptionList from '@/components/questions/OptionList'
 import { StimulusContent } from '@/components/questions/StimulusContent'
+import { AIAnswer } from '@/components/questions/AIAnswer'
 
 export default async function ExamPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -266,46 +267,7 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
                 <OptionList options={question.options} />
               )}
 
-              {/* AI Answer & Explanation */}
-              {(question.answer || question.explanation) && (
-                <div className="ml-[3.25rem] mt-3 rounded-lg border border-indigo-100 bg-indigo-50/50 overflow-hidden">
-                  <div className="px-4 py-2.5 border-b border-indigo-100 bg-indigo-50">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-indigo-900">AI Answer</span>
-
-                      {question.answer === 'Unable to determine' && (
-                        <span className="rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
-                          Needs Review
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="px-4 py-3 space-y-3">
-                    {question.answer && (
-                      <div>
-                        <div className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1">
-                          Answer
-                        </div>
-
-                        <div className="font-semibold text-gray-900">{question.answer}</div>
-                      </div>
-                    )}
-
-                    {question.explanation && (
-                      <div>
-                        <div className="text-xs font-semibold uppercase tracking-wide text-gray-500 mb-1">
-                          Explanation
-                        </div>
-
-                        <div className="text-sm text-gray-700 whitespace-pre-wrap">
-                          {question.explanation}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
+              <AIAnswer answer={question.answer} explanation={question.explanation} />
 
               {/* Action Toolbar */}
               <div className="flex items-center pl-[3.25rem] pt-2 border-t border-gray-100">

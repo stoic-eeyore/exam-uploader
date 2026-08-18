@@ -13,6 +13,12 @@ type QuestionForAI = {
   options: {
     text?: string | null
   }[]
+  stimulusId?: string
+}
+
+type StimulusForAI = {
+  id: string
+  content: string
 }
 
 type AIAnswer = {
@@ -86,11 +92,28 @@ export async function answerExamQuestions(examId: string) {
         question.options?.map((option) => ({
           text: option.text || null,
         })) || [],
+      stimulusId:
+        typeof question.stimulus === 'object' && question.stimulus
+          ? String(question.stimulus.id)
+          : question.stimulus
+            ? String(question.stimulus)
+            : undefined,
     }))
 
   if (questions.length === 0) {
     console.log(`[answer-questions] No unanswered questions for exam ${examId}`)
     return
+  }
+
+  const stimuli = new Map<string, StimulusForAI>()
+
+  for (const question of questionsResult.docs) {
+    if (typeof question.stimulus === 'object' && question.stimulus && question.stimulus.id) {
+      stimuli.set(String(question.stimulus.id), {
+        id: String(question.stimulus.id),
+        content: question.stimulus.content || '',
+      })
+    }
   }
 
   const batches = chunk(questions, ANSWER_BATCH_SIZE)
@@ -117,11 +140,13 @@ async function answerQuestionBatch(
   questions: QuestionForAI[],
 ) {
   const input = {
+    stimuli: Array.from(stimuli.values()),
     questions: questions.map((question) => ({
       questionNumber: question.questionNumber,
       questionType: question.questionType,
       questionText: question.questionText,
       options: question.options,
+      stimulusId: question.stimulusId ?? null,
     })),
   }
 
@@ -153,6 +178,21 @@ If a question cannot be answered reliably:
 - Explain clearly in the "explanation" field why the answer cannot be determined.
 - Examples include missing information, missing stimulus/image, genuinely ambiguous wording, or no defensible correct answer.
 - Do not invent information or force an answer simply to produce a result.
+
+Some questions reference a stimulus.
+
+When a question contains a stimulusId, use the corresponding stimulus when solving the question.
+
+If the question requires information from a stimulus or image that is not available:
+- Set answer to "Unable to determine".
+- Explain specifically what information is missing.
+- Do not guess.
+
+The explanation may use Markdown and LaTeX where appropriate.
+For mathematical formulas, use standard Markdown-compatible LaTeX notation such as:
+$$
+x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}
+$$
 
 Important:
 - Analyze every question independently.
