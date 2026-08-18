@@ -339,6 +339,7 @@ export interface Question {
   explanation?: string | null;
   extractionConfidence?: number | null;
   aiRawResponse?: string | null;
+  answerAiRawResponse?: string | null;
   suggestedQuestionText?: string | null;
   suggestedQuestionType?: ('mcq' | 'essay') | null;
   suggestedOptions?:
@@ -664,6 +665,7 @@ export interface QuestionsSelect<T extends boolean = true> {
   explanation?: T;
   extractionConfidence?: T;
   aiRawResponse?: T;
+  answerAiRawResponse?: T;
   suggestedQuestionText?: T;
   suggestedQuestionType?: T;
   suggestedOptions?:

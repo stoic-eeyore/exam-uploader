@@ -131,6 +131,11 @@ export const Questions: CollectionConfig = {
     },
 
     {
+      name: 'answerAiRawResponse',
+      type: 'textarea',
+    },
+
+    {
       name: 'suggestedQuestionText',
       type: 'textarea',
     },
