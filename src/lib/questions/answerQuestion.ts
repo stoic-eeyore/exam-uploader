@@ -212,64 +212,59 @@ async function answerQuestionBatch(
       text: `
 You are an expert educational assessment solver.
 
-Your task is to solve each exam question provided below.
+Your task is to first evaluate the validity of each exam question provided below, and then solve it if it is valid.
 
-For every question:
+CRITICAL PROCESS FOR EVERY QUESTION:
+You must perform a strict validation check BEFORE trying to find a correct answer. A question is considered INVALID if it has missing information, missing important stimulus/images, completely ambiguous wording, typos that alter the core logic, or if a multiple-choice question contains zero correct options or more than one correct option.
 
-1. Determine the correct answer.
-2. Provide a concise but sufficiently clear explanation supporting the answer.
+Follow these steps in order for every question:
+
+1. VALIDATION: Check if the question can be reliably answered. If it cannot, you MUST set the "answer" field strictly to "Unable to determine" and provide a detailed reason in the "explanation" field detailing exactly what is missing or broken. Do not invent context or guess.
+2. DETERMINE ANSWER: If valid, determine the exact correct answer.
+3. EXPLAIN: Provide a concise but sufficiently clear explanation supporting that answer.
 
 For multiple-choice questions:
 - Return the answer as the option letter (A, B, C, etc.).
-- Make sure the selected option is actually supported by the question.
-- Do not assume an answer merely because one option appears more plausible.
-- Check all options before deciding on the answer.
+- Make sure the selected option is strictly supported by the text.
+- Do not assume an answer merely because one option appears more plausible than the others.
+- If you find that more than one option is completely correct and defensible, do not guess between them. Fail the validation step immediately and return "Unable to determine"
+- Check all options completely before deciding on the final answer. If all options are factually incorrect, fail the validation step and mark as "Unable to determine".
 
 For essay questions:
 - Provide a model answer that would reasonably receive full marks.
-- The answer should directly address what the question asks.
-- Include the key points that a strong student answer should contain.
+- The answer must directly address what the question asks.
+- Include the key structural points that a strong student answer should contain.
 
-If a question cannot be answered reliably:
-- Set "answer" to "Unable to determine".
-- Explain clearly in the "explanation" field why the answer cannot be determined.
-- Examples include missing information, missing stimulus/image, genuinely ambiguous wording, or no defensible correct answer.
-- Do not invent information or force an answer simply to produce a result.
+Context and Stimulus Rules:
+- Some questions reference a stimulus. When a question contains a stimulusId, use the corresponding stimulus when solving the question.
+- If the question requires information from a stimulus, passage, or image that is not explicitly provided in the payload, you MUST fail validation, set the answer to "Unable to determine", and state specifically what information is missing.
 
-Some questions reference a stimulus.
-
-When a question contains a stimulusId, use the corresponding stimulus when solving the question.
-
-If the question requires information from a stimulus or image that is not available:
-- Set answer to "Unable to determine".
-- Explain specifically what information is missing.
-- Do not guess.
-
-The explanation may use Markdown and LaTeX where appropriate.
-For mathematical formulas, use standard Markdown-compatible LaTeX notation such as:
+Formatting Rules:
+- The explanation may use Markdown and LaTeX where appropriate.
+- For mathematical formulas, use standard Markdown-compatible LaTeX notation such as:
 $$
 x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}
 $$
-
-Important:
-- Analyze every question independently.
-- Do not use information from one question to answer another.
-- Do not modify the question text.
-- Do not skip any question.
+- Analyze every question completely independently. Do not carry over data between questions.
+- Do not modify the question text or skip any question.
 - Return exactly one result for every input question.
 - questionNumber and questionType must exactly match the input.
-- Return ONLY valid JSON.
-- Do not wrap the JSON in markdown code fences.
+- Return ONLY valid JSON. Do not wrap the JSON in markdown code fences or backticks.
 
 Expected format:
-
 {
   "answers": [
     {
       "questionNumber": 1,
       "questionType": "mcq",
       "answer": "B",
-      "explanation": "..."
+      "explanation": "Step-by-step logic proving why B is correct..."
+    },
+    {
+      "questionNumber": 2,
+      "questionType": "mcq",
+      "answer": "Unable to determine",
+      "explanation": "Validation failed: The question asks to identify a feature in Diagram A, but no diagram or stimulus payload was provided."
     }
   ]
 }
