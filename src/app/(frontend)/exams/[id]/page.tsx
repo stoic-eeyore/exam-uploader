@@ -267,7 +267,7 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
                 <OptionList options={question.options} />
               )}
 
-              <AIAnswer answer={question.answer} explanation={question.explanation} />
+              <AIAnswer question={question} />
 
               {/* Action Toolbar */}
               <div className="flex items-center pl-[3.25rem] pt-2 border-t border-gray-100">

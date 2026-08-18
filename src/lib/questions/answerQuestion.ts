@@ -73,6 +73,7 @@ export async function answerExamQuestions(examId: string) {
       ],
     },
     limit: 10,
+    depth: 1,
     sort: 'questionNumber',
   })
 
@@ -129,15 +130,71 @@ export async function answerExamQuestions(examId: string) {
       `[answer-questions] Batch ${i + 1}/${batches.length}: questions ${batch[0].questionNumber}-${batch[batch.length - 1].questionNumber}`,
     )
 
-    await answerQuestionBatch(payload, batch)
+    await answerQuestionBatch(payload, batch, stimuli)
   }
 
   console.log(`[answer-questions] Finished exam ${examId}`)
 }
 
+export async function answerSingleQuestion(questionId: string) {
+  const payload = await getPayload({
+    config,
+  })
+
+  const question = await payload.findByID({
+    collection: 'questions',
+    id: questionId,
+    depth: 1,
+  })
+
+  if (!question) {
+    throw new Error('Question not found')
+  }
+
+  if (question.questionNumber == null || !question.questionText || !question.questionType) {
+    throw new Error('Question is missing required data')
+  }
+
+  const questionForAI: QuestionForAI = {
+    id: String(question.id),
+    questionNumber: question.questionNumber,
+    questionType: question.questionType as 'mcq' | 'essay',
+    questionText: question.questionText,
+    options:
+      question.options?.map((option) => ({
+        text: option.text || null,
+      })) || [],
+    stimulusId:
+      typeof question.stimulus === 'object' && question.stimulus
+        ? String(question.stimulus.id)
+        : question.stimulus
+          ? String(question.stimulus)
+          : undefined,
+  }
+
+  const stimuli = new Map<string, StimulusForAI>()
+
+  if (typeof question.stimulus === 'object' && question.stimulus && question.stimulus.id) {
+    stimuli.set(String(question.stimulus.id), {
+      id: String(question.stimulus.id),
+      content: question.stimulus.content || '',
+    })
+  }
+
+  await answerQuestionBatch(payload, [questionForAI], stimuli)
+
+  // Return the fresh question so the UI can immediately update.
+  return payload.findByID({
+    collection: 'questions',
+    id: questionId,
+    depth: 1,
+  })
+}
+
 async function answerQuestionBatch(
   payload: Awaited<ReturnType<typeof getPayload>>,
   questions: QuestionForAI[],
+  stimuli: Map<string, StimulusForAI>,
 ) {
   const input = {
     stimuli: Array.from(stimuli.values()),
