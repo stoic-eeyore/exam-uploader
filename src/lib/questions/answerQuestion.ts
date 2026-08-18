@@ -72,7 +72,7 @@ export async function answerExamQuestions(examId: string) {
         },
       ],
     },
-    limit: 10,
+    limit: 50,
     depth: 1,
     sort: 'questionNumber',
   })
