@@ -18,6 +18,7 @@ export async function GET(req: NextRequest) {
 
   const payload = await getPayload({ config })
 
+  // Explicit exam ID = process that entire exam
   if (examId) {
     console.log(`[cron/answer-questions] Urgent processing requested for exam ${examId}`)
 
@@ -39,42 +40,69 @@ export async function GET(req: NextRequest) {
     })
   }
 
-  const processedExamId = await processNextExam(payload)
+  // No exam ID = process the oldest unanswered question
+  const question = await findOldestUnansweredQuestion(payload)
+
+  if (!question) {
+    console.log('[cron/answer-questions] No unanswered questions')
+
+    return NextResponse.json({
+      success: true,
+      mode: 'queue',
+      processed: false,
+      message: 'No unanswered questions',
+    })
+  }
+
+  const questionExamId = typeof question.exam === 'object' ? question.exam?.id : question.exam
+
+  if (!questionExamId) {
+    console.warn(`[cron/answer-questions] Question ${question.id} has no exam`)
+
+    return NextResponse.json({
+      success: true,
+      mode: 'queue',
+      processed: false,
+      message: `Question ${question.id} has no exam`,
+    })
+  }
+
+  console.log(
+    `[cron/answer-questions] Processing oldest unanswered question ${question.id} from exam ${questionExamId}`,
+  )
+
+  await answerExamQuestions(String(questionExamId))
 
   return NextResponse.json({
     success: true,
-    examId: processedExamId,
     mode: 'queue',
+    processed: true,
+    questionId: question.id,
+    examId: questionExamId,
   })
 }
 
-async function processNextExam(payload: BasePayload) {
+async function findOldestUnansweredQuestion(payload: BasePayload) {
   const result = await payload.find({
-    collection: 'exams',
+    collection: 'questions',
     where: {
-      processingStatus: {
-        equals: 'review',
-      },
+      and: [
+        {
+          answer: {
+            equals: null,
+          },
+        },
+        {
+          exam: {
+            exists: true,
+          },
+        },
+      ],
     },
     sort: 'createdAt',
     limit: 1,
     depth: 0,
   })
 
-  console.log(`[cron/answer-questions] Found ${result.totalDocs} exams in review`)
-
-  if (result.docs.length === 0) {
-    console.log('[cron/answer-questions] Nothing to process')
-    return false
-  }
-
-  const exam = result.docs[0]
-
-  console.log(`[cron/answer-questions] Processing exam ${exam.id}: ${exam.filename}`)
-
-  await answerExamQuestions(String(exam.id))
-
-  console.log(`[cron/answer-questions] Finished answering exam ${exam.id}`)
-
-  return true
+  return result.docs[0] ?? null
 }

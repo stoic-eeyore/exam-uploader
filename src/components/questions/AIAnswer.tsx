@@ -82,7 +82,9 @@ export function AIAnswer({ question }: Props) {
               Answer
             </div>
 
-            <div className="font-semibold text-gray-900">{answer}</div>
+            <div className="font-semibold text-gray-900">
+              <Markdown>{answer}</Markdown>
+            </div>
           </div>
         )}
 
