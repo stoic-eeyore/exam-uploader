@@ -3,6 +3,8 @@ import { MigrateUpArgs, MigrateDownArgs, sql } from '@payloadcms/db-postgres'
 export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   await db.execute(sql`
    ALTER TYPE "public"."enum_exams_year" ADD VALUE '2026/2027' BEFORE '2025/2026';
+    COMMIT; -- 1. Force save the new enum value to the database
+    BEGIN;  -- 2. Open a new transaction block for the rest of the changes
   ALTER TABLE "exams" ALTER COLUMN "year" SET DEFAULT '2026/2027';`)
 }
 
