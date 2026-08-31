@@ -33,7 +33,7 @@ async function executeConversion(
 
   await organizeInDrive(
     pendingExam.driveFileId,
-    process.env.GOOGLE_DRIVE_DROPBOX_FOLDER_ID!,
+    undefined,
     year,
     gradeName,
     subjectName,

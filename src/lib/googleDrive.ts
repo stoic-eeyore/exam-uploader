@@ -4,6 +4,8 @@ import { Readable } from 'stream'
 
 const credentials = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT!)
 
+const GOOGLE_FOLDER_MIME_TYPE = 'application/vnd.google-apps.folder'
+
 const auth = new google.auth.GoogleAuth({
   credentials,
   scopes: ['https://www.googleapis.com/auth/drive'],
@@ -254,15 +256,44 @@ export async function getDriveFileAsPdf(
 }
 
 export async function listDriveFiles(folderId: string) {
-  const response = await drive.files.list({
-    q: `'${folderId}' in parents and trashed=false`,
-    fields: 'files(id, name, mimeType, size, webViewLink, md5Checksum)',
-    pageSize: 100,
-    supportsAllDrives: true,
-    includeItemsFromAllDrives: true,
-  })
+  const files: any[] = []
 
-  return response.data.files || []
+  async function scanFolder(currentFolderId: string) {
+    let pageToken: string | undefined
+
+    do {
+      const response = await drive.files.list({
+        q: `'${currentFolderId}' in parents and trashed=false`,
+        fields: 'nextPageToken, files(id, name, mimeType, size, webViewLink, md5Checksum)',
+        pageSize: 100,
+        pageToken,
+        supportsAllDrives: true,
+        includeItemsFromAllDrives: true,
+      })
+
+      const items = response.data.files || []
+
+      for (const item of items) {
+        if (item.mimeType === GOOGLE_FOLDER_MIME_TYPE) {
+          console.log(`Scanning folder: ${item.name} (${item.id})`)
+
+          if (item.id) {
+            await scanFolder(item.id)
+          }
+
+          continue
+        }
+
+        files.push(item)
+      }
+
+      pageToken = response.data.nextPageToken || undefined
+    } while (pageToken)
+  }
+
+  await scanFolder(folderId)
+
+  return files
 }
 
 /**
@@ -429,4 +460,77 @@ export async function moveToArchiveFolder({
     supportsAllDrives: true,
     fields: 'id, parents',
   })
+}
+
+async function folderContainsFiles(folderId: string): Promise<boolean> {
+  const response = await drive.files.list({
+    q: `'${folderId}' in parents and trashed=false`,
+    fields: 'files(id, mimeType)',
+    pageSize: 100,
+    supportsAllDrives: true,
+    includeItemsFromAllDrives: true,
+  })
+
+  const children = response.data.files || []
+
+  for (const child of children) {
+    // Found a real file
+    if (child.mimeType !== GOOGLE_FOLDER_MIME_TYPE) {
+      return true
+    }
+
+    // Check inside subfolder
+    if (child.id) {
+      const childContainsFiles = await folderContainsFiles(child.id)
+
+      if (childContainsFiles) {
+        return true
+      }
+    }
+  }
+
+  return false
+}
+
+export async function archiveEmptyFolderTrees(rootFolderId: string) {
+  const archiveFolderId = process.env.GOOGLE_DRIVE_ARCHIVE_FOLDER_ID
+
+  if (!archiveFolderId) {
+    throw new Error('GOOGLE_DRIVE_ARCHIVE_FOLDER_ID not configured')
+  }
+
+  let archived = 0
+
+  const rootResponse = await drive.files.list({
+    q: `'${rootFolderId}' in parents and trashed=false`,
+    fields: 'files(id, name, mimeType)',
+    pageSize: 100,
+    supportsAllDrives: true,
+    includeItemsFromAllDrives: true,
+  })
+
+  for (const item of rootResponse.data.files || []) {
+    if (item.mimeType !== GOOGLE_FOLDER_MIME_TYPE || !item.id) {
+      continue
+    }
+
+    const hasFiles = await folderContainsFiles(item.id)
+
+    if (!hasFiles) {
+      console.log(`Archiving empty folder tree: ${item.name} (${item.id})`)
+
+      await drive.files.update({
+        fileId: item.id,
+        addParents: archiveFolderId,
+        removeParents: rootFolderId,
+        supportsAllDrives: true,
+        fields: 'id, name, parents',
+      })
+
+      archived++
+    }
+  }
+
+  console.log(`Archived ${archived} empty folder trees from root folder ${rootFolderId}`)
+  return archived
 }

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 
 import { getPayloadClient } from '@/lib/payload'
-import { listDriveFiles, convertDriveDocxToPdfFile } from '@/lib/googleDrive'
+import { listDriveFiles, archiveEmptyFolderTrees } from '@/lib/googleDrive'
 
 export async function POST() {
   console.log('Syncing pending exams from Google Drive...')
@@ -27,8 +27,8 @@ export async function POST() {
       const existing = await payload.find({
         collection: 'pending-exams',
         where: {
-          driveUrl: {
-            equals: file.webViewLink,
+          driveFileId: {
+            equals: file.id,
           },
         },
         limit: 1,
@@ -37,10 +37,6 @@ export async function POST() {
       if (existing.docs.length > 0) {
         continue
       }
-
-      let finalDriveUrl = file.webViewLink || `https://google.com{file.id}/view`
-      let finalMimeType = file.mimeType || 'application/pdf'
-      let finalFilename = file.name || 'exam.pdf'
 
       console.log(`Importing file: ${file.name} (${file.webViewLink})`)
       await payload.create({
@@ -58,6 +54,8 @@ export async function POST() {
 
       imported++
     }
+
+    await archiveEmptyFolderTrees(folderId)
 
     return NextResponse.json({
       success: true,
