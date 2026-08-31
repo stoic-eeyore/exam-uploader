@@ -223,6 +223,7 @@ export interface Exam {
   subject: number | Subject;
   label: string;
   year:
+    | '2026/2027'
     | '2025/2026'
     | '2024/2025'
     | '2023/2024'
