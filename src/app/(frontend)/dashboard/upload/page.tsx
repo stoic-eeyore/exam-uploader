@@ -150,6 +150,7 @@ export default function UploadPage() {
           <input name="label" placeholder="Label (e.g. Formatif 1)" style={styles.input} />
 
           <select name="year" required style={styles.input}>
+            <option value="2026/2027">2026/2027</option>
             <option value="2025/2026">2025/2026</option>
             <option value="2024/2025">2024/2025</option>
             <option value="2023/2024">2023/2024</option>

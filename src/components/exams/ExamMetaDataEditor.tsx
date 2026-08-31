@@ -206,6 +206,7 @@ export default function ExamMetadataEditor({ exam }: { exam: ExamMetadata }) {
               onChange={(e) => setFormData({ ...formData, year: e.target.value })}
               className="w-full px-3 py-2 border border-gray-200 rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
+              <option value="2026/2027">2026/2027</option>
               <option value="2025/2026">2025/2026</option>
               <option value="2024/2025">2024/2025</option>
               <option value="2023/2024">2023/2024</option>

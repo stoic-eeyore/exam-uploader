@@ -4,7 +4,7 @@ import fs from 'fs'
 import { uploadToDrive } from '../lib/googleDrive'
 
 const yearOptions = []
-for (let year = 2025; year >= 2015; year--) {
+for (let year = 2026; year >= 2015; year--) {
   const label = `${year}/${year + 1}`
   yearOptions.push({
     label: label, // What the editor sees
@@ -62,7 +62,7 @@ export const Exams: CollectionConfig = {
           type: 'select',
           required: true,
           options: yearOptions,
-          defaultValue: '2025/2026',
+          defaultValue: '2026/2027',
         },
       ],
     },

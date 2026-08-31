@@ -39,7 +39,7 @@ export default function ReviewConvertModal({ exam, onClose, onConverted, onVerif
     setError(null)
     setForm({
       label: exam.aiAnalysis.label || '',
-      year: exam.aiAnalysis.year || '2025/2026',
+      year: exam.aiAnalysis.year || '2026/2027',
       gradeId: String(exam.aiAnalysis.gradeId || ''),
       subjectId: String(exam.aiAnalysis.subjectId || ''),
       semester: exam.aiAnalysis.semester || '',
