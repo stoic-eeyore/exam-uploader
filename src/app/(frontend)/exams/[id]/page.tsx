@@ -308,7 +308,7 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
 
                   <QuestionActionsMenu
                     questionId={question.id}
-                    questionNumber={question.questionNumber}
+                    questionNumber={question.questionNumber ?? 0}
                     hasStimulus={Boolean(question.stimulus)}
                   />
                 </div>
