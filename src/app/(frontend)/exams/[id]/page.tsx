@@ -69,6 +69,7 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
   const reviewedCount = questions.docs.filter((q: any) => q.status === 'verified').length
   const fixedCount = questions.docs.reduce((sum: number, q: any) => sum + (q.fixes?.length || 0), 0)
   const allReviewed = totalQuestions > 0 && reviewedCount === totalQuestions
+  const flaggedCount = questions.docs.filter((q: any) => q.status === 'flagged').length
 
   const stimulusMap = new Map<number, any>()
   for (const stim of stimuli.docs) {
@@ -110,16 +111,31 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
           <div className="text-sm text-gray-500">Questions</div>
           <div className="flex items-baseline gap-2 mt-1">
             <span className="text-2xl font-bold text-gray-900">{totalQuestions}</span>
-            <span
-              className={`text-sm font-medium inline-flex items-center gap-1 ${allReviewed ? 'text-emerald-600' : 'text-gray-400'}`}
-            >
-              {allReviewed && <CheckCircle2 size={14} />}({reviewedCount} reviewed)
-              {fixedCount > 0 && (
+
+            <div className="flex items-center gap-2 mt-1">
+              <span
+                className={`text-sm font-medium inline-flex items-center gap-1 ${
+                  allReviewed ? 'text-emerald-600' : 'text-gray-400'
+                }`}
+              >
+                {allReviewed && <CheckCircle2 size={14} />}
+                {reviewedCount} reviewed
+              </span>
+
+              {flaggedCount > 0 && (
                 <span className="text-sm font-medium text-amber-600 inline-flex items-center gap-1">
-                  <Wrench size={14} />({fixedCount} fixed)
+                  <Flag size={14} />
+                  {flaggedCount} flagged
                 </span>
               )}
-            </span>
+
+              {fixedCount > 0 && (
+                <span className="text-sm font-medium text-amber-600 inline-flex items-center gap-1">
+                  <Wrench size={14} />
+                  {fixedCount} fixed
+                </span>
+              )}
+            </div>
           </div>
           <div className="mt-2 w-full bg-gray-100 rounded-full h-1.5">
             <div
