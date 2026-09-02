@@ -17,6 +17,7 @@ import CreateStimulusModal from '@/components/questions/CreateStimulusModal'
 import EditStimulusModal from '@/components/questions/EditStimulusModal'
 import { AIAnswer } from '@/components/questions/AIAnswer'
 import QuestionActionsMenu from '@/components/questions/QuestionActionMenu'
+import QuestionVisibilityToggle from '@/components/questions/QuestionVisibilityToggle'
 
 export default async function ExamPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -212,128 +213,135 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
         </div>
       </div>
 
-      <div className="space-y-6">
-        {questions.docs.map((question) => {
-          const qualityIssues = question.qualityIssues ?? []
-          const isVerified = question.status === 'verified'
-          const isFlagged = question.status === 'flagged'
+      <div>
+        <div className="flex justify-end mb-4">
+          <QuestionVisibilityToggle />
+        </div>
 
-          // Render stimulus if this question has one and we haven't shown it yet
-          const stimulusId =
-            typeof question.stimulus === 'number'
-              ? question.stimulus
-              : (question.stimulus as any)?.id
-          const stimulus = stimulusId ? stimulusMap.get(stimulusId) : null
-          const shouldShowStimulus = stimulus && !renderedStimuli.has(stimulus.stimulusNumber)
-          if (shouldShowStimulus) {
-            renderedStimuli.add(stimulus.stimulusNumber)
-          }
+        <div className="space-y-6">
+          {questions.docs.map((question) => {
+            const qualityIssues = question.qualityIssues ?? []
+            const isVerified = question.status === 'verified'
+            const isFlagged = question.status === 'flagged'
 
-          return (
-            <div
-              key={question.id}
-              className={`rounded-lg border p-4 shadow-sm bg-white space-y-3 ${
-                isVerified
-                  ? 'border-l-4 border-l-emerald-500'
-                  : isFlagged
-                    ? 'border-l-4 border-l-amber-500'
-                    : 'border-l-4 border-l-transparent'
-              }`}
-            >
-              {shouldShowStimulus && (
-                <div className="mb-3 p-4 rounded-lg bg-amber-50 border border-amber-200">
-                  <div className="flex items-center justify-between gap-2 mb-2">
-                    <div className="flex items-center gap-2">
-                      <BookOpen size={14} className="text-amber-600" />
-                      <span className="text-xs font-semibold text-amber-700 uppercase tracking-wide">
-                        Stimulus {stimulus.stimulusNumber}
-                      </span>
+            // Render stimulus if this question has one and we haven't shown it yet
+            const stimulusId =
+              typeof question.stimulus === 'number'
+                ? question.stimulus
+                : (question.stimulus as any)?.id
+            const stimulus = stimulusId ? stimulusMap.get(stimulusId) : null
+            const shouldShowStimulus = stimulus && !renderedStimuli.has(stimulus.stimulusNumber)
+            if (shouldShowStimulus) {
+              renderedStimuli.add(stimulus.stimulusNumber)
+            }
+
+            return (
+              <div
+                key={question.id}
+                data-question-status={question.status}
+                className={`rounded-lg border p-4 shadow-sm bg-white space-y-3 ${
+                  isVerified
+                    ? 'border-l-4 border-l-emerald-500'
+                    : isFlagged
+                      ? 'border-l-4 border-l-amber-500'
+                      : 'border-l-4 border-l-transparent'
+                }`}
+              >
+                {shouldShowStimulus && (
+                  <div className="mb-3 p-4 rounded-lg bg-amber-50 border border-amber-200">
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <div className="flex items-center gap-2">
+                        <BookOpen size={14} className="text-amber-600" />
+                        <span className="text-xs font-semibold text-amber-700 uppercase tracking-wide">
+                          Stimulus {stimulus.stimulusNumber}
+                        </span>
+                      </div>
+
+                      <EditStimulusModal stimulusId={stimulus.id} />
                     </div>
 
-                    <EditStimulusModal stimulusId={stimulus.id} />
+                    <StimulusContent content={stimulus.content} images={stimulus.images} />
                   </div>
+                )}
 
-                  <StimulusContent content={stimulus.content} images={stimulus.images} />
-                </div>
-              )}
+                <div className="flex items-start gap-3">
+                  <span className="font-bold text-gray-900 min-w-[2.5rem] text-sm">
+                    Q{question.questionNumber}
+                  </span>
 
-              <div className="flex items-start gap-3">
-                <span className="font-bold text-gray-900 min-w-[2.5rem] text-sm">
-                  Q{question.questionNumber}
-                </span>
+                  <div className="flex-1">
+                    <div className="mb-2 flex flex-wrap items-center gap-2">
+                      {question.cognitiveLevel && (
+                        <span className="rounded bg-blue-100 px-2 py-1 text-xs">
+                          {question.cognitiveLevel}
+                        </span>
+                      )}
 
-                <div className="flex-1">
-                  <div className="mb-2 flex flex-wrap items-center gap-2">
-                    {question.cognitiveLevel && (
-                      <span className="rounded bg-blue-100 px-2 py-1 text-xs">
-                        {question.cognitiveLevel}
-                      </span>
-                    )}
+                      {isVerified && (
+                        <span className="rounded bg-emerald-100 px-2 py-1 text-xs text-emerald-700 font-medium inline-flex items-center gap-1">
+                          <CheckCircle2 size={12} />
+                          Verified
+                        </span>
+                      )}
 
-                    {isVerified && (
-                      <span className="rounded bg-emerald-100 px-2 py-1 text-xs text-emerald-700 font-medium inline-flex items-center gap-1">
-                        <CheckCircle2 size={12} />
-                        Verified
-                      </span>
-                    )}
+                      {isFlagged && (
+                        <span className="rounded bg-amber-100 px-2 py-1 text-xs text-amber-700 font-medium inline-flex items-center gap-1">
+                          <Flag size={12} />
+                          Flagged
+                        </span>
+                      )}
 
-                    {isFlagged && (
-                      <span className="rounded bg-amber-100 px-2 py-1 text-xs text-amber-700 font-medium inline-flex items-center gap-1">
-                        <Flag size={12} />
-                        Flagged
-                      </span>
-                    )}
+                      {qualityIssues.length > 0 && (
+                        <span className="rounded bg-red-100 px-2 py-1 text-xs text-red-700">
+                          {qualityIssues.length} issue(s)
+                        </span>
+                      )}
+                    </div>
 
-                    {qualityIssues.length > 0 && (
-                      <span className="rounded bg-red-100 px-2 py-1 text-xs text-red-700">
-                        {qualityIssues.length} issue(s)
-                      </span>
-                    )}
+                    <div className="mb-3">
+                      <QualityIssuesEditor question={question} />
+                    </div>
+
+                    <QuestionStem question={question} />
                   </div>
+                </div>
 
-                  <div className="mb-3">
-                    <QualityIssuesEditor question={question} />
+                {question.questionType === 'mcq' && question.options && (
+                  <OptionList options={question.options} />
+                )}
+
+                <AIAnswer question={question} />
+
+                {/* Action Toolbar */}
+                <div className="flex items-center pl-[3.25rem] pt-2 border-t border-gray-100">
+                  <div className="inline-flex rounded-md border border-gray-200">
+                    <StatusButton question={question} />
+
+                    <div className="w-px bg-gray-200" />
+
+                    <EditQuestionModal
+                      questionId={question.id}
+                      grades={grades.docs}
+                      subjects={subjects.docs}
+                    />
+
+                    <div className="w-px bg-gray-200" />
+
+                    <ReextractButton questionId={question.id} />
+
+                    <QuestionActionsMenu question={question} />
                   </div>
-
-                  <QuestionStem question={question} />
                 </div>
-              </div>
 
-              {question.questionType === 'mcq' && question.options && (
-                <OptionList options={question.options} />
-              )}
-
-              <AIAnswer question={question} />
-
-              {/* Action Toolbar */}
-              <div className="flex items-center pl-[3.25rem] pt-2 border-t border-gray-100">
-                <div className="inline-flex rounded-md border border-gray-200">
-                  <StatusButton question={question} />
-
-                  <div className="w-px bg-gray-200" />
-
-                  <EditQuestionModal
-                    questionId={question.id}
-                    grades={grades.docs}
-                    subjects={subjects.docs}
-                  />
-
-                  <div className="w-px bg-gray-200" />
-
-                  <ReextractButton questionId={question.id} />
-
-                  <QuestionActionsMenu question={question} />
+                <div className="pl-[3.25rem] pt-2">
+                  <FixesLog question={question} />
                 </div>
-              </div>
 
-              <div className="pl-[3.25rem] pt-2">
-                <FixesLog question={question} />
+                {question.suggestedQuestionText && <ReviewSuggestionModal question={question} />}
               </div>
-
-              {question.suggestedQuestionText && <ReviewSuggestionModal question={question} />}
-            </div>
-          )
-        })}
+            )
+          })}
+        </div>
       </div>
 
       {/* DEBUG: AI Raw Response — discreet, collapsible */}
