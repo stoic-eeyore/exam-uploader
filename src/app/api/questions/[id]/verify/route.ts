@@ -13,7 +13,9 @@ export const POST = withAuth(async (req, { params, user, payload }) => {
   const isCurrentlyVerified = question.status === 'verified'
   const newStatus = isCurrentlyVerified ? 'draft' : 'verified'
 
-  const updateData: any = { status: newStatus }
+  const updateData: any = {
+    status: newStatus,
+  }
 
   if (newStatus === 'verified') {
     updateData.verifiedBy = user.id
@@ -32,7 +34,6 @@ export const POST = withAuth(async (req, { params, user, payload }) => {
   })
 
   // After updating the question...
-
   const examId = typeof question.exam === 'object' ? question.exam.id : question.exam
 
   const allQuestions = await payload.find({

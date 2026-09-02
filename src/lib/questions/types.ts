@@ -15,7 +15,7 @@ export interface QuestionListItem {
   gradeName: string
 
   reviewedByAI: boolean
-  status: 'draft' | 'verified' | 'pending'
+  status: 'draft' | 'verified' | 'flagged'
   cognitiveLevel: CognitiveLevel | null
 
   updatedAt: string
@@ -90,7 +90,7 @@ export interface QuestionDetail extends EditableQuestion {
 
   suggestedInstructions: string | null
 
-  status: 'draft' | 'verified'
+  status: 'draft' | 'verified' | 'flagged'
 
   fixes: {
     note: string

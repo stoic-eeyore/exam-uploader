@@ -10,7 +10,7 @@ export const Questions: CollectionConfig = {
 
         const wasVerified = originalDoc?.status === 'verified'
         const isNowVerified = data.status === 'verified'
-        const isNowDraft = data.status === 'draft'
+        const isNowUnverified = data.status === 'draft' || data.status === 'flagged'
 
         // Just got verified
         if (!wasVerified && isNowVerified) {
@@ -19,7 +19,7 @@ export const Questions: CollectionConfig = {
         }
 
         // Just got un-verified
-        if (wasVerified && isNowDraft) {
+        if (wasVerified && isNowUnverified) {
           data.verifiedBy = null
           data.verifiedAt = null
         }
@@ -230,6 +230,10 @@ export const Questions: CollectionConfig = {
         {
           label: 'Verified',
           value: 'verified',
+        },
+        {
+          label: 'Flagged',
+          value: 'flagged',
         },
       ],
     },

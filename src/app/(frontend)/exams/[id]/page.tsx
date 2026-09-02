@@ -3,9 +3,9 @@ import { getPayload } from 'payload'
 import ReextractButton from '@/components/exams/ReextractButton'
 import ReviewSuggestionModal from '@/components/questions/ReviewSuggestionModal'
 import EditQuestionModal from '@/components/questions/EditQuestionModal'
-import VerifyButton from '@/components/questions/VerifyButton'
+import StatusButton from '@/components/questions/StatusButton'
 import Link from 'next/link'
-import { ChevronLeft, CheckCircle2, Wrench, Bug, BookOpen } from 'lucide-react'
+import { ChevronLeft, CheckCircle2, Wrench, Bug, BookOpen, Flag } from 'lucide-react'
 import QualityIssuesEditor from '@/components/questions/QualityIssuesEditor'
 import FixesLog from '@/components/questions/FixesLog'
 import ExamMetaDataEditor from '@/components/exams/ExamMetaDataEditor'
@@ -198,6 +198,7 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
         {questions.docs.map((question) => {
           const qualityIssues = question.qualityIssues ?? []
           const isVerified = question.status === 'verified'
+          const isFlagged = question.status === 'flagged'
 
           // Render stimulus if this question has one and we haven't shown it yet
           const stimulusId =
@@ -214,7 +215,11 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
             <div
               key={question.id}
               className={`rounded-lg border p-4 shadow-sm bg-white space-y-3 ${
-                isVerified ? 'border-l-4 border-l-emerald-500' : 'border-l-4 border-l-transparent'
+                isVerified
+                  ? 'border-l-4 border-l-emerald-500'
+                  : isFlagged
+                    ? 'border-l-4 border-l-amber-500'
+                    : 'border-l-4 border-l-transparent'
               }`}
             >
               {shouldShowStimulus && (
@@ -254,6 +259,13 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
                       </span>
                     )}
 
+                    {isFlagged && (
+                      <span className="rounded bg-amber-100 px-2 py-1 text-xs text-amber-700 font-medium inline-flex items-center gap-1">
+                        <Flag size={12} />
+                        Flagged
+                      </span>
+                    )}
+
                     {qualityIssues.length > 0 && (
                       <span className="rounded bg-red-100 px-2 py-1 text-xs text-red-700">
                         {qualityIssues.length} issue(s)
@@ -278,7 +290,7 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
               {/* Action Toolbar */}
               <div className="flex items-center pl-[3.25rem] pt-2 border-t border-gray-100">
                 <div className="inline-flex rounded-md border border-gray-200">
-                  <VerifyButton question={question} />
+                  <StatusButton question={question} />
                   <div className="w-px bg-gray-200" />
                   <EditQuestionModal
                     questionId={question.id}

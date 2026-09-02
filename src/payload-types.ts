@@ -360,7 +360,7 @@ export interface Question {
     | null;
   cognitiveLevel?: ('recall' | 'understanding' | 'hots') | null;
   reviewedByAI?: boolean | null;
-  status?: ('draft' | 'verified') | null;
+  status?: ('draft' | 'verified' | 'flagged') | null;
   verifiedBy?: (number | null) | User;
   verifiedAt?: string | null;
   fixes?:
