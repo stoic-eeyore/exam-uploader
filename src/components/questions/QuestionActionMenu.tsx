@@ -1,20 +1,50 @@
 'use client'
 
 import { useState } from 'react'
-
 import { MoreHorizontal, Plus } from 'lucide-react'
-
 import CreateStimulusModal from './CreateStimulusModal'
+import CopyQuestionButton from './CopyQuestionButton'
 
 interface Props {
-  questionId: number
-  questionNumber: number
-  hasStimulus: boolean
+  question: {
+    id: number
+    questionNumber?: number | null
+    questionText?: string | null
+    questionType?: 'mcq' | 'essay' | null
+    options?:
+      | {
+          text?: string | null
+        }[]
+      | null
+    images?:
+      | {
+          url: string
+          alt?: string | null
+        }[]
+      | null
+    stimulus?:
+      | {
+          stimulusNumber?: number | null
+          content?: string | null
+          images?:
+            | {
+                url: string
+                alt?: string | null
+              }[]
+            | null
+        }
+      | number
+      | null
+  }
 }
 
-export default function QuestionActionsMenu({ questionId, questionNumber, hasStimulus }: Props) {
+export default function QuestionActionsMenu({ question }: Props) {
   const [open, setOpen] = useState(false)
   const [createStimulusOpen, setCreateStimulusOpen] = useState(false)
+
+  const questionId = question.id
+  const questionNumber = question.questionNumber
+  const hasStimulus = Boolean(question.stimulus)
 
   return (
     <>
@@ -31,6 +61,8 @@ export default function QuestionActionsMenu({ questionId, questionNumber, hasSti
 
         {open && (
           <div className="absolute right-0 top-full mt-1 z-40 w-48 rounded-md border border-gray-200 bg-white py-1 shadow-lg">
+            <CopyQuestionButton question={question} onCopied={() => setOpen(false)} />
+
             {!hasStimulus && (
               <button
                 onClick={() => {
@@ -49,7 +81,7 @@ export default function QuestionActionsMenu({ questionId, questionNumber, hasSti
       {!hasStimulus && (
         <CreateStimulusModal
           questionId={questionId}
-          questionNumber={questionNumber}
+          questionNumber={questionNumber ?? 0}
           open={createStimulusOpen}
           onOpenChange={setCreateStimulusOpen}
         />

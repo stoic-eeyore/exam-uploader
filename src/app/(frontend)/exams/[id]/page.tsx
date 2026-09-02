@@ -306,11 +306,7 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
 
                   <ReextractButton questionId={question.id} />
 
-                  <QuestionActionsMenu
-                    questionId={question.id}
-                    questionNumber={question.questionNumber ?? 0}
-                    hasStimulus={Boolean(question.stimulus)}
-                  />
+                  <QuestionActionsMenu question={question} />
                 </div>
               </div>
 
