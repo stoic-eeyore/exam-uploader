@@ -4,7 +4,7 @@ import { useState } from 'react'
 import type { QuestionFormData } from '@/lib/questions/types'
 import { Grade, Subject } from '@/payload-types'
 import QuestionOptionsEditor from '@/components/questions/QuestionOptionsEditor'
-import QuestionImageEditor from '@/components/questions/QuestionImageEditor'
+import ImageEditor from '@/components/questions/ImageEditor'
 import { Loader2 } from 'lucide-react'
 
 interface Props {
@@ -183,7 +183,7 @@ export function QuestionForm({ initialData, grades, subjects, onSave }: Props) {
         />
       </div>
 
-      <QuestionImageEditor
+      <ImageEditor
         hasImage={hasImage}
         setHasImage={setHasImage}
         imageUrl={imageUrl}

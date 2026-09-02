@@ -13,6 +13,7 @@ import StatusEditor from '@/components/exams/StatusEditor'
 import { QuestionStem } from '@/components/questions/QuestionStem'
 import OptionList from '@/components/questions/OptionList'
 import { StimulusContent } from '@/components/questions/StimulusContent'
+import EditStimulusModal from '@/components/questions/EditStimulusModal'
 import { AIAnswer } from '@/components/questions/AIAnswer'
 
 export default async function ExamPage({ params }: { params: Promise<{ id: string }> }) {
@@ -218,12 +219,17 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
             >
               {shouldShowStimulus && (
                 <div className="mb-3 p-4 rounded-lg bg-amber-50 border border-amber-200">
-                  <div className="flex items-center gap-2 mb-2">
-                    <BookOpen size={14} className="text-amber-600" />
-                    <span className="text-xs font-semibold text-amber-700 uppercase tracking-wide">
-                      Stimulus {stimulus.stimulusNumber}
-                    </span>
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <div className="flex items-center gap-2">
+                      <BookOpen size={14} className="text-amber-600" />
+                      <span className="text-xs font-semibold text-amber-700 uppercase tracking-wide">
+                        Stimulus {stimulus.stimulusNumber}
+                      </span>
+                    </div>
+
+                    <EditStimulusModal stimulusId={stimulus.id} />
                   </div>
+
                   <StimulusContent content={stimulus.content} images={stimulus.images} />
                 </div>
               )}
