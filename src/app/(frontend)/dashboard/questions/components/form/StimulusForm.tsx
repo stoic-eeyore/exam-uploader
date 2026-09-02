@@ -2,18 +2,9 @@
 
 import { useState } from 'react'
 import { Loader2 } from 'lucide-react'
+import type { StimulusFormData } from '@/types/stimulus'
 
 import ImageEditor from '@/components/questions/ImageEditor'
-
-export interface StimulusFormData {
-  content: string
-  images: {
-    url: string
-    placement: 'right' | 'auto' | 'top' | 'inline'
-    width: number
-    alt: string | null
-  }[]
-}
 
 interface Props {
   initialData: StimulusFormData

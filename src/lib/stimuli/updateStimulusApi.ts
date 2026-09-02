@@ -1,4 +1,4 @@
-import type { StimulusFormData } from '@/app/(frontend)/dashboard/questions/components/form/StimulusForm'
+import type { StimulusFormData } from '@/types/stimulus'
 
 export async function updateStimulusApi(id: number, data: StimulusFormData): Promise<void> {
   const response = await fetch(`/api/stimuli/${id}`, {

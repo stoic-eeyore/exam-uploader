@@ -13,8 +13,10 @@ import StatusEditor from '@/components/exams/StatusEditor'
 import { QuestionStem } from '@/components/questions/QuestionStem'
 import OptionList from '@/components/questions/OptionList'
 import { StimulusContent } from '@/components/questions/StimulusContent'
+import CreateStimulusModal from '@/components/questions/CreateStimulusModal'
 import EditStimulusModal from '@/components/questions/EditStimulusModal'
 import { AIAnswer } from '@/components/questions/AIAnswer'
+import QuestionActionsMenu from '@/components/questions/QuestionActionMenu'
 
 export default async function ExamPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -291,7 +293,9 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
               <div className="flex items-center pl-[3.25rem] pt-2 border-t border-gray-100">
                 <div className="inline-flex rounded-md border border-gray-200">
                   <StatusButton question={question} />
+
                   <div className="w-px bg-gray-200" />
+
                   <EditQuestionModal
                     questionId={question.id}
                     grades={grades.docs}
@@ -299,7 +303,14 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
                   />
 
                   <div className="w-px bg-gray-200" />
+
                   <ReextractButton questionId={question.id} />
+
+                  <QuestionActionsMenu
+                    questionId={question.id}
+                    questionNumber={question.questionNumber}
+                    hasStimulus={Boolean(question.stimulus)}
+                  />
                 </div>
               </div>
 

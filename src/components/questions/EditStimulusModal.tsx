@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { Pencil, X, Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import type { StimulusFormData } from '@/app/(frontend)/dashboard/questions/components/form/StimulusForm'
+import type { StimulusFormData } from '@/types/stimulus'
 import { StimulusForm } from '@/app/(frontend)/dashboard/questions/components/form/StimulusForm'
 import { getStimulusApi } from '@/lib/stimuli/getStimulusApi'
 import { updateStimulusApi } from '@/lib/stimuli/updateStimulusApi'
