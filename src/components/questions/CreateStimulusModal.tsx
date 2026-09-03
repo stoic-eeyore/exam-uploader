@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import type { StimulusFormData } from '@/types/stimulus'
 import { StimulusForm } from '@/app/(frontend)/dashboard/questions/components/form/StimulusForm'
 import { createStimulus } from '@/lib/stimuli/createStimulus'
+import { StimulusQuestionRange } from '@/components/questions/StimulusQuestionRange'
 
 interface Props {
   questionId: number
@@ -69,29 +70,12 @@ export default function CreateStimulusModal({
         {error && (
           <div className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-600">{error}</div>
         )}
-        <div className="mb-5">
-          <label className="block text-sm font-medium text-gray-700 mb-2">Affected questions</label>
-
-          <div className="flex items-center gap-2">
-            <input
-              type="number"
-              min={1}
-              value={startQuestion}
-              onChange={(e) => setStartQuestion(Number(e.target.value))}
-              className="w-20 rounded-md border border-gray-300 px-3 py-2 text-sm"
-            />
-
-            <span className="text-gray-500">–</span>
-
-            <input
-              type="number"
-              min={1}
-              value={endQuestion}
-              onChange={(e) => setEndQuestion(Number(e.target.value))}
-              className="w-20 rounded-md border border-gray-300 px-3 py-2 text-sm"
-            />
-          </div>
-        </div>
+        <StimulusQuestionRange
+          startQuestion={startQuestion}
+          endQuestion={endQuestion}
+          onStartChange={setStartQuestion}
+          onEndChange={setEndQuestion}
+        />
         <StimulusForm
           initialData={{
             content: '',

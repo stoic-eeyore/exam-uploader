@@ -1,6 +1,11 @@
-import type { Stimulus } from '@/payload-types'
+import type { Question, Stimulus } from '@/payload-types'
 
-export async function getStimulusApi(id: number): Promise<Stimulus> {
+export interface StimulusWithQuestions {
+  stimulus: Stimulus
+  questions: Question[]
+}
+
+export async function getStimulusApi(id: number): Promise<StimulusWithQuestions> {
   const response = await fetch(`/api/stimuli/${id}`)
 
   if (!response.ok) {

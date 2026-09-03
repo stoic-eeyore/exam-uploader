@@ -1,22 +1,29 @@
 'use client'
 
 import { useState } from 'react'
-import { Pencil, X, Loader2 } from 'lucide-react'
+import { Pencil, X, Loader2, Trash2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import type { StimulusFormData } from '@/types/stimulus'
 import { StimulusForm } from '@/app/(frontend)/dashboard/questions/components/form/StimulusForm'
 import { getStimulusApi } from '@/lib/stimuli/getStimulusApi'
 import { updateStimulusApi } from '@/lib/stimuli/updateStimulusApi'
+import { deleteStimulusApi } from '@/lib/stimuli/deleteStimulusApi'
 import type { Stimulus } from '@/payload-types'
+import { StimulusQuestionRange } from '@/components/questions/StimulusQuestionRange'
 
 interface Props {
   stimulusId: number
+  questionNumber: number
 }
 
-export default function EditStimulusModal({ stimulusId }: Props) {
+export default function EditStimulusModal({ stimulusId, questionNumber }: Props) {
   const [stimulus, setStimulus] = useState<Stimulus | null>(null)
+  const [startQuestion, setStartQuestion] = useState(questionNumber)
+  const [endQuestion, setEndQuestion] = useState(questionNumber)
   const [loading, setLoading] = useState(false)
+  const [deleting, setDeleting] = useState(false)
   const [open, setOpen] = useState(false)
+
   const router = useRouter()
 
   async function handleOpen() {
@@ -25,8 +32,19 @@ export default function EditStimulusModal({ stimulusId }: Props) {
     setLoading(true)
 
     try {
-      const stimulus = await getStimulusApi(stimulusId)
-      setStimulus(stimulus)
+      const result = await getStimulusApi(stimulusId)
+
+      setStimulus(result.stimulus)
+
+      const questionNumbers = result.questions
+        .map((question) => question.questionNumber)
+        .filter((number): number is number => number != null)
+        .sort((a, b) => a - b)
+
+      if (questionNumbers.length > 0) {
+        setStartQuestion(questionNumbers[0])
+        setEndQuestion(questionNumbers[questionNumbers.length - 1])
+      }
     } finally {
       setLoading(false)
     }
@@ -34,11 +52,33 @@ export default function EditStimulusModal({ stimulusId }: Props) {
 
   async function handleSave(data: StimulusFormData) {
     try {
-      await updateStimulusApi(stimulusId, data)
+      await updateStimulusApi(stimulusId, startQuestion, endQuestion, data)
+
       setOpen(false)
       router.refresh()
     } catch (err) {
       console.error('Failed to save stimulus:', err)
+    }
+  }
+
+  async function handleDelete() {
+    const confirmed = window.confirm(
+      'Are you sure you want to remove this stimulus? This action cannot be undone.',
+    )
+
+    if (!confirmed) return
+
+    setDeleting(true)
+
+    try {
+      await deleteStimulusApi(stimulusId)
+
+      setOpen(false)
+      router.refresh()
+    } catch (err) {
+      console.error('Failed to delete stimulus:', err)
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -66,6 +106,7 @@ export default function EditStimulusModal({ stimulusId }: Props) {
 
               <button
                 onClick={() => setOpen(false)}
+                disabled={deleting}
                 className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-md hover:bg-gray-100"
               >
                 <X size={20} />
@@ -78,18 +119,44 @@ export default function EditStimulusModal({ stimulusId }: Props) {
                   <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
                 </div>
               ) : stimulus ? (
-                <StimulusForm
-                  initialData={{
-                    content: stimulus.content ?? '',
-                    images: (stimulus.images ?? []).map((image) => ({
-                      url: image.url,
-                      placement: image.placement ?? 'right',
-                      width: image.width ?? 220,
-                      alt: image.alt ?? null,
-                    })),
-                  }}
-                  onSave={handleSave}
-                />
+                <>
+                  <StimulusQuestionRange
+                    startQuestion={startQuestion}
+                    endQuestion={endQuestion}
+                    onStartChange={setStartQuestion}
+                    onEndChange={setEndQuestion}
+                  />
+
+                  <StimulusForm
+                    initialData={{
+                      content: stimulus.content ?? '',
+                      images: (stimulus.images ?? []).map((image) => ({
+                        url: image.url,
+                        placement: image.placement ?? 'right',
+                        width: image.width ?? 220,
+                        alt: image.alt ?? null,
+                      })),
+                    }}
+                    onSave={handleSave}
+                  />
+
+                  <div className="border-t pt-5">
+                    <button
+                      type="button"
+                      onClick={handleDelete}
+                      disabled={deleting}
+                      className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                    >
+                      {deleting ? (
+                        <Loader2 size={16} className="animate-spin" />
+                      ) : (
+                        <Trash2 size={16} />
+                      )}
+
+                      {deleting ? 'Removing...' : 'Remove stimulus'}
+                    </button>
+                  </div>
+                </>
               ) : (
                 <div className="text-center py-8 text-gray-500">Failed to load stimulus.</div>
               )}
