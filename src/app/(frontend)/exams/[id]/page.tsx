@@ -257,7 +257,10 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
                         </span>
                       </div>
 
-                      <EditStimulusModal stimulusId={stimulus.id} />
+                      <EditStimulusModal
+                        stimulusId={stimulus.id}
+                        questionNumber={question.questionNumber ?? 0}
+                      />
                     </div>
 
                     <StimulusContent content={stimulus.content} images={stimulus.images} />
