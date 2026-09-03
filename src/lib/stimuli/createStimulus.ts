@@ -8,6 +8,7 @@ import type { StimulusFormData } from '@/types/stimulus'
 
 export async function createStimulus(
   questionId: number,
+  questionType: 'mcq' | 'essay',
   startQuestion: number,
   endQuestion: number,
   data: StimulusFormData,
@@ -41,6 +42,11 @@ export async function createStimulus(
         {
           exam: {
             equals: examId,
+          },
+        },
+        {
+          questionType: {
+            equals: questionType,
           },
         },
         {

@@ -48,7 +48,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     return NextResponse.json({ error: 'Stimulus not found' }, { status: 404 })
   }
 
-  const { startQuestion, endQuestion, content, images } = body
+  const { startQuestion, endQuestion, questionType, content, images } = body
 
   // Update the stimulus itself
   await payload.update({
@@ -81,6 +81,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
         {
           exam: {
             equals: examId,
+          },
+        },
+        {
+          questionType: {
+            equals: questionType,
           },
         },
         {

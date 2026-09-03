@@ -18,6 +18,7 @@ interface Props {
 
 export default function EditStimulusModal({ stimulusId, questionNumber }: Props) {
   const [stimulus, setStimulus] = useState<Stimulus | null>(null)
+  const [questionType, setQuestionType] = useState<'mcq' | 'essay' | null>(null)
   const [startQuestion, setStartQuestion] = useState(questionNumber)
   const [endQuestion, setEndQuestion] = useState(questionNumber)
   const [loading, setLoading] = useState(false)
@@ -28,6 +29,10 @@ export default function EditStimulusModal({ stimulusId, questionNumber }: Props)
 
   async function handleOpen() {
     setStimulus(null)
+    setQuestionType(null)
+    setStartQuestion(questionNumber)
+    setEndQuestion(questionNumber)
+
     setOpen(true)
     setLoading(true)
 
@@ -36,14 +41,17 @@ export default function EditStimulusModal({ stimulusId, questionNumber }: Props)
 
       setStimulus(result.stimulus)
 
-      const questionNumbers = result.questions
-        .map((question) => question.questionNumber)
-        .filter((number): number is number => number != null)
-        .sort((a, b) => a - b)
+      if (result.questions.length > 0) {
+        setQuestionType(result.questions[0].questionType ?? null)
 
-      if (questionNumbers.length > 0) {
-        setStartQuestion(questionNumbers[0])
-        setEndQuestion(questionNumbers[questionNumbers.length - 1])
+        const questionNumbers = result.questions
+          .map((question) => question.questionNumber)
+          .filter((number): number is number => number != null)
+
+        if (questionNumbers.length > 0) {
+          setStartQuestion(Math.min(...questionNumbers))
+          setEndQuestion(Math.max(...questionNumbers))
+        }
       }
     } finally {
       setLoading(false)
@@ -51,8 +59,12 @@ export default function EditStimulusModal({ stimulusId, questionNumber }: Props)
   }
 
   async function handleSave(data: StimulusFormData) {
+    if (!questionType) {
+      return
+    }
+
     try {
-      await updateStimulusApi(stimulusId, startQuestion, endQuestion, data)
+      await updateStimulusApi(stimulusId, questionType, startQuestion, endQuestion, data)
 
       setOpen(false)
       router.refresh()

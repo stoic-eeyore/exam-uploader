@@ -11,6 +11,7 @@ import { StimulusQuestionRange } from '@/components/questions/StimulusQuestionRa
 interface Props {
   questionId: number
   questionNumber: number
+  questionType: 'mcq' | 'essay'
   open: boolean
   onOpenChange: (open: boolean) => void
 }
@@ -18,6 +19,7 @@ interface Props {
 export default function CreateStimulusModal({
   questionId,
   questionNumber,
+  questionType,
   open,
   onOpenChange,
 }: Props) {
@@ -31,7 +33,7 @@ export default function CreateStimulusModal({
     try {
       setError(null)
 
-      await createStimulus(questionId, startQuestion, endQuestion, data)
+      await createStimulus(questionId, questionType, startQuestion, endQuestion, data)
 
       onOpenChange(false)
 

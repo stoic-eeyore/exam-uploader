@@ -81,6 +81,7 @@ export default function QuestionActionsMenu({ question }: Props) {
       {!hasStimulus && (
         <CreateStimulusModal
           questionId={questionId}
+          questionType={question.questionType ?? 'mcq'}
           questionNumber={questionNumber ?? 0}
           open={createStimulusOpen}
           onOpenChange={setCreateStimulusOpen}

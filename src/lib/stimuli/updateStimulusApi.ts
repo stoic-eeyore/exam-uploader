@@ -2,6 +2,7 @@ import type { StimulusFormData } from '@/types/stimulus'
 
 export async function updateStimulusApi(
   id: number,
+  questionType: 'mcq' | 'essay',
   startQuestion: number,
   endQuestion: number,
   data: StimulusFormData,
@@ -12,6 +13,7 @@ export async function updateStimulusApi(
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
+      questionType,
       startQuestion,
       endQuestion,
       ...data,
