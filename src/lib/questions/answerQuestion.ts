@@ -13,12 +13,14 @@ type QuestionForAI = {
   options: {
     text?: string | null
   }[]
+  images: string[]
   stimulusId?: string
 }
 
 type StimulusForAI = {
   id: string
   content: string
+  images: string[]
 }
 
 type AIAnswer = {
@@ -93,6 +95,7 @@ export async function answerExamQuestions(examId: string) {
         question.options?.map((option) => ({
           text: option.text || null,
         })) || [],
+      images: question.images?.map((image) => image.url) || [],
       stimulusId:
         typeof question.stimulus === 'object' && question.stimulus
           ? String(question.stimulus.id)
@@ -113,6 +116,7 @@ export async function answerExamQuestions(examId: string) {
       stimuli.set(String(question.stimulus.id), {
         id: String(question.stimulus.id),
         content: question.stimulus.content || '',
+        images: question.stimulus.images?.map((image) => image.url) || [],
       })
     }
   }
@@ -164,6 +168,7 @@ export async function answerSingleQuestion(questionId: string) {
       question.options?.map((option) => ({
         text: option.text || null,
       })) || [],
+    images: question.images?.map((image) => image.url || '') || [],
     stimulusId:
       typeof question.stimulus === 'object' && question.stimulus
         ? String(question.stimulus.id)
@@ -178,6 +183,7 @@ export async function answerSingleQuestion(questionId: string) {
     stimuli.set(String(question.stimulus.id), {
       id: String(question.stimulus.id),
       content: question.stimulus.content || '',
+      images: question.stimulus.images?.map((image) => image.url) || [],
     })
   }
 
@@ -204,12 +210,11 @@ async function answerQuestionBatch(
       questionText: question.questionText,
       options: question.options,
       stimulusId: question.stimulusId ?? null,
+      images: question.images,
     })),
   }
 
-  const result = await geminiModel.generateContent([
-    {
-      text: `
+  const prompt = `
 You are an expert educational assessment solver.
 
 Your task is to first evaluate the validity of each exam question provided below, and then solve it if it is valid.
@@ -272,7 +277,11 @@ Expected format:
 Questions:
 
 ${JSON.stringify(input, null, 2)}
-      `,
+      `
+
+  const result = await geminiModel.generateContent([
+    {
+      text: prompt,
     },
   ])
 
