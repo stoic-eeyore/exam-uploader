@@ -17,6 +17,7 @@ import EditStimulusModal from '@/components/questions/EditStimulusModal'
 import { AIAnswer } from '@/components/questions/AIAnswer'
 import QuestionActionsMenu from '@/components/questions/QuestionActionMenu'
 import QuestionVisibilityToggle from '@/components/questions/QuestionVisibilityToggle'
+import ExamActionsMenu from '@/components/exams/ExamActionsMenu'
 
 export default async function ExamPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -79,7 +80,6 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
 
   return (
     <div className="p-6 space-y-6">
-      {/* Back Navigation */}
       <div>
         <Link
           href="/dashboard"
@@ -89,7 +89,6 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
           Exams
         </Link>
 
-        {/* Exam Metadata Editor — client component with edit mode */}
         <ExamMetaDataEditor
           exam={{
             id: exam.id,
@@ -103,6 +102,7 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
             subject: exam.subject,
             driveFileId: exam.driveFileId,
           }}
+          actions={<ExamActionsMenu examId={String(exam.id)} />}
         />
       </div>
 

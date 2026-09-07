@@ -21,7 +21,12 @@ type ExamMetadata = {
   driveFileId?: string | null
 }
 
-export default function ExamMetadataEditor({ exam }: { exam: ExamMetadata }) {
+type Props = {
+  exam: ExamMetadata
+  actions?: React.ReactNode
+}
+
+export default function ExamMetadataEditor({ exam, actions }: Props) {
   const [isEditing, setIsEditing] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -137,6 +142,7 @@ export default function ExamMetadataEditor({ exam }: { exam: ExamMetadata }) {
           </button>
           {exam.processingStatus === 'uploaded' && <ExtractButton examId={Number(exam.id)} />}
           {!exam.reviewedByAI && <ReviewQuestionsButton examId={Number(exam.id)} />}
+          {actions}
         </div>
       </div>
     )
