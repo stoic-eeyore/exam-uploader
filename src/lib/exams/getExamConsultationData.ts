@@ -89,30 +89,9 @@ export async function getExamConsultationData(examId: string) {
             }
           : {}),
 
-        ...(question.answer
-          ? {
-              answer: question.answer,
-            }
-          : {}),
-
         ...(stimulus
           ? {
               stimulus,
-            }
-          : {}),
-
-        ...(question.cognitiveLevel
-          ? {
-              cognitiveLevel: question.cognitiveLevel,
-            }
-          : {}),
-
-        ...(question.qualityIssues?.length
-          ? {
-              qualityIssues: question.qualityIssues.map((issue) => ({
-                issue: issue.issue ?? '',
-                severity: issue.severity ?? null,
-              })),
             }
           : {}),
       }
