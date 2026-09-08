@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { MoreHorizontal } from 'lucide-react'
 
 import CopyExamForAI from './CopyExamForAI'
+import ReviewExamButton from './ReviewExamButton'
 
 interface ExamActionsMenuProps {
   examId: string
@@ -40,6 +41,10 @@ export default function ExamActionsMenu({ examId }: ExamActionsMenuProps) {
 
       {open && (
         <div className="absolute right-0 top-full z-20 mt-1 w-52 rounded-md border border-gray-200 bg-white py-1 shadow-lg">
+          <ReviewExamButton examId={examId} />
+
+          <div className="my-1 border-t" />
+
           <CopyExamForAI examId={examId} />
         </div>
       )}

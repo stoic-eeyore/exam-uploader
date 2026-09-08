@@ -1,16 +1,33 @@
 import { NextResponse } from 'next/server'
-import { reviewExamQuestions } from '@/lib/reviewExamQuestions'
 
-export async function POST(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> },
-) {
-  const { id } = await params
+import { reviewExam } from '@/lib/exams/reviewExam'
 
-  await reviewExamQuestions(id)
-
-  return NextResponse.json({
-    success: true,
-  })
+interface RouteContext {
+  params: Promise<{
+    id: string
+  }>
 }
 
+export async function POST(request: Request, { params }: RouteContext) {
+  try {
+    const { id } = await params
+
+    const result = await reviewExam(id)
+
+    return NextResponse.json({
+      success: true,
+      result,
+    })
+  } catch (error) {
+    console.error('Failed to review exam:', error)
+
+    return NextResponse.json(
+      {
+        error: 'Failed to review exam',
+      },
+      {
+        status: 500,
+      },
+    )
+  }
+}

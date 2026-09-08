@@ -172,6 +172,11 @@ export const Exams: CollectionConfig = {
         readOnly: true,
       },
     },
+
+    {
+      name: 'examReview',
+      type: 'json',
+    },
   ],
 
   hooks: {

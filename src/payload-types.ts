@@ -272,6 +272,15 @@ export interface Exam {
   reviewedByAI?: boolean | null;
   uploadedBy?: (number | null) | User;
   uploadedAt?: string | null;
+  examReview?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -358,7 +367,7 @@ export interface Question {
         id?: string | null;
       }[]
     | null;
-  cognitiveLevel?: ('recall' | 'understanding' | 'hots') | null;
+  cognitiveLevel?: ('recall' | 'understanding' | 'hots' | 'mots' | 'lots') | null;
   reviewedByAI?: boolean | null;
   status?: ('draft' | 'verified' | 'flagged') | null;
   verifiedBy?: (number | null) | User;
@@ -609,6 +618,7 @@ export interface ExamsSelect<T extends boolean = true> {
   reviewedByAI?: T;
   uploadedBy?: T;
   uploadedAt?: T;
+  examReview?: T;
   updatedAt?: T;
   createdAt?: T;
 }

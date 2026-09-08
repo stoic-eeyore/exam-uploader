@@ -18,6 +18,7 @@ import { AIAnswer } from '@/components/questions/AIAnswer'
 import QuestionActionsMenu from '@/components/questions/QuestionActionMenu'
 import QuestionVisibilityToggle from '@/components/questions/QuestionVisibilityToggle'
 import ExamActionsMenu from '@/components/exams/ExamActionsMenu'
+import ExamReview from '@/components/exams/ExamReview'
 
 export default async function ExamPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -211,6 +212,8 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
           </div>
         </div>
       </div>
+
+      <ExamReview review={exam.examReview} />
 
       <div>
         <div className="flex justify-end mb-4">

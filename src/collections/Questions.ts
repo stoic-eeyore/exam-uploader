@@ -209,6 +209,14 @@ export const Questions: CollectionConfig = {
           label: 'HOTS',
           value: 'hots',
         },
+        {
+          label: 'MOTS',
+          value: 'mots',
+        },
+        {
+          label: 'LOTS',
+          value: 'lots',
+        },
       ],
     },
 

@@ -3,11 +3,13 @@ import { getPayload } from 'payload'
 
 export async function getExamConsultationData(examId: string) {
   console.log(`Fetching consultation data for exam ID: ${examId}`)
+
   const payload = await getPayload({
     config,
   })
 
   console.log('Fetching exam, questions, and stimuli data...')
+
   const [exam, questionsResult, stimuliResult] = await Promise.all([
     payload.findByID({
       collection: 'exams',
@@ -49,13 +51,7 @@ export async function getExamConsultationData(examId: string) {
   }
 
   const stimuliMap = new Map(
-    stimuliResult.docs.map((stimulus) => [
-      String(stimulus.id),
-      {
-        number: stimulus.stimulusNumber,
-        content: stimulus.content,
-      },
-    ]),
+    stimuliResult.docs.map((stimulus) => [String(stimulus.id), stimulus.stimulusNumber]),
   )
 
   return {
@@ -68,6 +64,11 @@ export async function getExamConsultationData(examId: string) {
       semester: exam.semester ?? null,
     },
 
+    stimuli: stimuliResult.docs.map((stimulus) => ({
+      number: stimulus.stimulusNumber ?? null,
+      content: stimulus.content ?? '',
+    })),
+
     questions: questionsResult.docs.map((question) => {
       const stimulusId =
         typeof question.stimulus === 'object' && question.stimulus !== null
@@ -76,7 +77,7 @@ export async function getExamConsultationData(examId: string) {
             ? String(question.stimulus)
             : null
 
-      const stimulus = stimulusId ? stimuliMap.get(stimulusId) : null
+      const stimulusNumber = stimulusId ? (stimuliMap.get(stimulusId) ?? null) : null
 
       return {
         number: question.questionNumber ?? null,
@@ -89,9 +90,15 @@ export async function getExamConsultationData(examId: string) {
             }
           : {}),
 
-        ...(stimulus
+        ...(stimulusNumber !== null
           ? {
-              stimulus,
+              stimulusNumber,
+            }
+          : {}),
+
+        ...(question.answer
+          ? {
+              answer: question.answer,
             }
           : {}),
       }
