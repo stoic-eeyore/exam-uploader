@@ -1,6 +1,6 @@
 import type { Question } from '@/payload-types'
 
-export type CognitiveLevel = 'recall' | 'understanding' | 'hots'
+export type CognitiveLevel = 'recall' | 'understanding' | 'hots' | 'mots' | 'lots'
 
 export interface QuestionListItem {
   id: number
@@ -73,7 +73,7 @@ export interface QuestionDetail extends EditableQuestion {
 
   extractionConfidence: number | null
 
-  cognitiveLevel: 'recall' | 'understanding' | 'hots' | null
+  cognitiveLevel: CognitiveLevel | null
 
   qualityIssues: {
     issue: string
