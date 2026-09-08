@@ -3,7 +3,6 @@ import { getPayload } from 'payload'
 import { geminiModel } from '@/lib/gemini'
 import { extractJson } from '@/utils/json'
 import { getExamConsultationData } from './getExamConsultationData'
-import { prepareExamReviewForStorage } from './prepareExamReviewForStorage'
 
 export async function reviewExam(examId: string) {
   const payload = await getPayload({
