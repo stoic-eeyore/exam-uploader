@@ -1,4 +1,16 @@
-import { Brain, CheckCircle2, ChevronDown, Lightbulb, Target, TrendingUp } from 'lucide-react'
+'use client'
+
+import { useState } from 'react'
+import {
+  Brain,
+  CheckCircle2,
+  ChevronDown,
+  Lightbulb,
+  MoreHorizontal,
+  Target,
+  TrendingUp,
+} from 'lucide-react'
+import EditExamReviewJson from './EditExamReviewJson'
 
 type Rating = 'weak' | 'adequate' | 'strong'
 
@@ -23,6 +35,7 @@ export interface ExamReviewData {
 }
 
 interface ExamReviewProps {
+  examId: string
   review?: ExamReviewData | null
 }
 
@@ -68,137 +81,163 @@ function DimensionRow({ label, dimension }: { label: string; dimension?: Dimensi
   )
 }
 
-export default function ExamReview({ review }: ExamReviewProps) {
+export default function ExamReview({ examId, review }: ExamReviewProps) {
   if (!review) return null
 
+  const [showEditReview, setShowEditReview] = useState(false)
   const dimensions = review.assessmentDimensions
 
   const overallRating = dimensions?.overallAssessmentQuality?.rating
 
   return (
-    <details className="group mb-6 rounded-xl border border-gray-200 bg-white shadow-sm">
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 [&::-webkit-details-marker]:hidden">
-        <div className="flex min-w-0 items-center gap-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
-            <Brain size={20} />
-          </div>
-
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <h2 className="text-base font-semibold text-gray-900">Assessment Quality Review</h2>
-
-              <RatingBadge rating={overallRating} />
+    <>
+      <details className="group mb-6 rounded-xl border border-gray-200 bg-white shadow-sm">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-5 py-4 [&::-webkit-details-marker]:hidden">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+              <Brain size={20} />
             </div>
 
-            <p className="mt-0.5 text-sm text-gray-500">
-              AI assessment of the exam&apos;s ability to measure student capability
-            </p>
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="text-base font-semibold text-gray-900">Assessment Quality Review</h2>
+
+                <RatingBadge rating={overallRating} />
+              </div>
+
+              <p className="mt-0.5 text-sm text-gray-500">
+                AI assessment of the exam&apos;s ability to measure student capability
+              </p>
+            </div>
           </div>
+
+          <div className="flex shrink-0 items-center gap-1">
+            <button
+              type="button"
+              onClick={(event) => {
+                event.preventDefault()
+                event.stopPropagation()
+                setShowEditReview(true)
+              }}
+              className="rounded-md p-1.5 text-gray-400 opacity-0 transition-opacity hover:bg-gray-100 hover:text-gray-600 group-hover:opacity-100 focus:opacity-100"
+              title="Edit review JSON"
+            >
+              <MoreHorizontal size={18} />
+            </button>
+
+            <ChevronDown
+              size={20}
+              className="text-gray-400 transition-transform duration-200 group-open:rotate-180"
+            />
+          </div>
+        </summary>
+
+        <div className="border-t border-gray-100 px-5 py-5">
+          {review.summary && (
+            <div className="mb-6">
+              <p className="text-sm leading-6 text-gray-700">{review.summary}</p>
+            </div>
+          )}
+
+          {(review.strengths?.length || review.limitations?.length) && (
+            <div className="mb-6 grid gap-5 md:grid-cols-2">
+              {review.strengths && review.strengths.length > 0 && (
+                <div>
+                  <div className="mb-3 flex items-center gap-2">
+                    <CheckCircle2 size={18} className="text-emerald-600" />
+                    <h3 className="text-sm font-semibold text-gray-900">Strengths</h3>
+                  </div>
+
+                  <ul className="space-y-2">
+                    {review.strengths.map((strength, index) => (
+                      <li key={index} className="text-sm leading-5 text-gray-600">
+                        • {strength}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {review.limitations && review.limitations.length > 0 && (
+                <div>
+                  <div className="mb-3 flex items-center gap-2">
+                    <Target size={18} className="text-amber-600" />
+                    <h3 className="text-sm font-semibold text-gray-900">Limitations</h3>
+                  </div>
+
+                  <ul className="space-y-2">
+                    {review.limitations.map((limitation, index) => (
+                      <li key={index} className="text-sm leading-5 text-gray-600">
+                        • {limitation}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+
+          {dimensions && (
+            <div className="mb-6">
+              <div className="mb-3 flex items-center gap-2">
+                <TrendingUp size={18} className="text-indigo-600" />
+                <h3 className="text-sm font-semibold text-gray-900">Assessment Dimensions</h3>
+              </div>
+
+              <div className="rounded-lg border border-gray-200 px-4">
+                <DimensionRow label="Cognitive Range" dimension={dimensions.cognitiveRange} />
+
+                <DimensionRow
+                  label="Depth of Understanding"
+                  dimension={dimensions.depthOfUnderstanding}
+                />
+
+                <DimensionRow
+                  label="Application & Transfer"
+                  dimension={dimensions.applicationAndTransfer}
+                />
+
+                <DimensionRow
+                  label="Reasoning & Problem Solving"
+                  dimension={dimensions.reasoningAndProblemSolving}
+                />
+
+                <DimensionRow label="Authenticity" dimension={dimensions.authenticity} />
+
+                <DimensionRow
+                  label="Overall Assessment Quality"
+                  dimension={dimensions.overallAssessmentQuality}
+                />
+              </div>
+            </div>
+          )}
+
+          {review.recommendations && review.recommendations.length > 0 && (
+            <div>
+              <div className="mb-3 flex items-center gap-2">
+                <Lightbulb size={18} className="text-blue-600" />
+                <h3 className="text-sm font-semibold text-gray-900">Recommendations</h3>
+              </div>
+
+              <ul className="space-y-2">
+                {review.recommendations.map((recommendation, index) => (
+                  <li key={index} className="text-sm leading-5 text-gray-600">
+                    • {recommendation}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
+      </details>
 
-        <ChevronDown
-          size={20}
-          className="shrink-0 text-gray-400 transition-transform duration-200 group-open:rotate-180"
+      {showEditReview && (
+        <EditExamReviewJson
+          examId={examId}
+          review={review}
+          onClose={() => setShowEditReview(false)}
         />
-      </summary>
-
-      <div className="border-t border-gray-100 px-5 py-5">
-        {review.summary && (
-          <div className="mb-6">
-            <p className="text-sm leading-6 text-gray-700">{review.summary}</p>
-          </div>
-        )}
-
-        {(review.strengths?.length || review.limitations?.length) && (
-          <div className="mb-6 grid gap-5 md:grid-cols-2">
-            {review.strengths && review.strengths.length > 0 && (
-              <div>
-                <div className="mb-3 flex items-center gap-2">
-                  <CheckCircle2 size={18} className="text-emerald-600" />
-                  <h3 className="text-sm font-semibold text-gray-900">Strengths</h3>
-                </div>
-
-                <ul className="space-y-2">
-                  {review.strengths.map((strength, index) => (
-                    <li key={index} className="text-sm leading-5 text-gray-600">
-                      • {strength}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {review.limitations && review.limitations.length > 0 && (
-              <div>
-                <div className="mb-3 flex items-center gap-2">
-                  <Target size={18} className="text-amber-600" />
-                  <h3 className="text-sm font-semibold text-gray-900">Limitations</h3>
-                </div>
-
-                <ul className="space-y-2">
-                  {review.limitations.map((limitation, index) => (
-                    <li key={index} className="text-sm leading-5 text-gray-600">
-                      • {limitation}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        )}
-
-        {dimensions && (
-          <div className="mb-6">
-            <div className="mb-3 flex items-center gap-2">
-              <TrendingUp size={18} className="text-indigo-600" />
-              <h3 className="text-sm font-semibold text-gray-900">Assessment Dimensions</h3>
-            </div>
-
-            <div className="rounded-lg border border-gray-200 px-4">
-              <DimensionRow label="Cognitive Range" dimension={dimensions.cognitiveRange} />
-
-              <DimensionRow
-                label="Depth of Understanding"
-                dimension={dimensions.depthOfUnderstanding}
-              />
-
-              <DimensionRow
-                label="Application & Transfer"
-                dimension={dimensions.applicationAndTransfer}
-              />
-
-              <DimensionRow
-                label="Reasoning & Problem Solving"
-                dimension={dimensions.reasoningAndProblemSolving}
-              />
-
-              <DimensionRow label="Authenticity" dimension={dimensions.authenticity} />
-
-              <DimensionRow
-                label="Overall Assessment Quality"
-                dimension={dimensions.overallAssessmentQuality}
-              />
-            </div>
-          </div>
-        )}
-
-        {review.recommendations && review.recommendations.length > 0 && (
-          <div>
-            <div className="mb-3 flex items-center gap-2">
-              <Lightbulb size={18} className="text-blue-600" />
-              <h3 className="text-sm font-semibold text-gray-900">Recommendations</h3>
-            </div>
-
-            <ul className="space-y-2">
-              {review.recommendations.map((recommendation, index) => (
-                <li key={index} className="text-sm leading-5 text-gray-600">
-                  • {recommendation}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-      </div>
-    </details>
+      )}
+    </>
   )
 }

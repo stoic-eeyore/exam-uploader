@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { MoreHorizontal } from 'lucide-react'
+import { Code2, MoreHorizontal } from 'lucide-react'
 
 import CopyExamForAI from './CopyExamForAI'
 import ReviewExamButton from './ReviewExamButton'
