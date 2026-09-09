@@ -44,6 +44,33 @@ function chunk<T>(items: T[], size: number): T[][] {
   return chunks
 }
 
+type ImagePart = {
+  mimeType: string
+  data: string
+}
+
+async function urlToImagePart(url: string): Promise<ImagePart> {
+  const response = await fetch(url)
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch image: ${url} (${response.status})`)
+  }
+
+  const mimeType = response.headers.get('content-type') || 'image/jpeg'
+  const buffer = Buffer.from(await response.arrayBuffer())
+
+  return {
+    mimeType,
+    data: buffer.toString('base64'),
+  }
+}
+
+async function loadImages(urls: string[]): Promise<ImagePart[]> {
+  const validUrls = urls.filter(Boolean)
+
+  return Promise.all(validUrls.map(urlToImagePart))
+}
+
 export async function answerExamQuestions(examId: string) {
   const payload = await getPayload({
     config,
@@ -203,14 +230,21 @@ async function answerQuestionBatch(
   stimuli: Map<string, StimulusForAI>,
 ) {
   const input = {
-    stimuli: Array.from(stimuli.values()),
+    stimuli: Array.from(stimuli.values()).map((stimulus) => ({
+      id: stimulus.id,
+      content: stimulus.content,
+      hasImages: stimulus.images.length > 0,
+      imageCount: stimulus.images.length,
+    })),
+
     questions: questions.map((question) => ({
       questionNumber: question.questionNumber,
       questionType: question.questionType,
       questionText: question.questionText,
       options: question.options,
       stimulusId: question.stimulusId ?? null,
-      images: question.images,
+      hasImages: question.images.length > 0,
+      imageCount: question.images.length,
     })),
   }
 
@@ -240,9 +274,18 @@ For essay questions:
 - The answer must directly address what the question asks.
 - Include the key structural points that a strong student answer should contain.
 
-Context and Stimulus Rules:
-- Some questions reference a stimulus. When a question contains a stimulusId, use the corresponding stimulus when solving the question.
-- If the question requires information from a stimulus, passage, or image that is not explicitly provided in the payload, you MUST fail validation, set the answer to "Unable to determine", and state specifically what information is missing.
+Context, Stimulus, and Image Rules:
+
+- Some questions reference a stimulus through stimulusId.
+- When a question contains a stimulusId, use the corresponding stimulus content AND all images associated with that stimulus.
+- Questions may also have images directly associated with the question. These images are provided separately as actual image inputs.
+- Do not assume that an image is decorative. Carefully inspect every provided image when determining whether the question can be answered.
+- If the question depends on information contained in an image, diagram, graph, chart, map, table, photograph, or other visual, you MUST inspect the actual image before answering.
+- If a required image is missing, unreadable, too ambiguous, or does not contain enough information to answer the question reliably, fail validation.
+- Do not infer or invent visual information that cannot be reliably determined from the provided image.
+- If a question references a stimulus or image that is not actually provided, set the answer to "Unable to determine" and explain exactly what is missing.
+- Images associated with a stimulus are available to every question referencing that stimulus.
+- Images associated directly with a question apply only to that question.
 
 Formatting Rules:
 - The explanation may use Markdown and LaTeX where appropriate.
@@ -279,11 +322,79 @@ Questions:
 ${JSON.stringify(input, null, 2)}
       `
 
-  const result = await geminiModel.generateContent([
+  const imageParts: {
+    questionNumber: number
+    questionType: 'mcq' | 'essay'
+    images: ImagePart[]
+  }[] = []
+
+  for (const question of questions) {
+    if (question.images.length === 0) continue
+
+    const images = await loadImages(question.images)
+
+    imageParts.push({
+      questionNumber: question.questionNumber,
+      questionType: question.questionType,
+      images,
+    })
+  }
+
+  const stimulusImageParts: {
+    stimulusId: string
+    images: ImagePart[]
+  }[] = []
+
+  for (const stimulus of stimuli.values()) {
+    if (stimulus.images.length === 0) continue
+
+    const images = await loadImages(stimulus.images)
+
+    stimulusImageParts.push({
+      stimulusId: stimulus.id,
+      images,
+    })
+  }
+
+  const contentParts: any[] = [
     {
       text: prompt,
     },
-  ])
+  ]
+
+  // Add stimulus images
+  for (const stimulus of stimulusImageParts) {
+    contentParts.push({
+      text: `The following image(s) belong to stimulus ID "${stimulus.stimulusId}".`,
+    })
+
+    for (const image of stimulus.images) {
+      contentParts.push({
+        inlineData: {
+          mimeType: image.mimeType,
+          data: image.data,
+        },
+      })
+    }
+  }
+
+  // Add question images
+  for (const question of imageParts) {
+    contentParts.push({
+      text: `The following image(s) belong to question ${question.questionNumber} (${question.questionType}).`,
+    })
+
+    for (const image of question.images) {
+      contentParts.push({
+        inlineData: {
+          mimeType: image.mimeType,
+          data: image.data,
+        },
+      })
+    }
+  }
+
+  const result = await geminiModel.generateContent(contentParts)
 
   const text = result.response.text()
   const cleaned = extractJson(text)
