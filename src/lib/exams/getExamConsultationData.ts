@@ -50,6 +50,18 @@ export async function getExamConsultationData(examId: string) {
     return value.name ?? value.title ?? null
   }
 
+  const getImages = (images: any[] | null | undefined) => {
+    if (!images || !Array.isArray(images)) {
+      return []
+    }
+
+    return images
+      .filter((image) => image?.url)
+      .map((image) => ({
+        url: image.url,
+      }))
+  }
+
   const stimuliMap = new Map(
     stimuliResult.docs.map((stimulus) => [String(stimulus.id), stimulus.stimulusNumber]),
   )
@@ -67,6 +79,7 @@ export async function getExamConsultationData(examId: string) {
     stimuli: stimuliResult.docs.map((stimulus) => ({
       number: stimulus.stimulusNumber ?? null,
       content: stimulus.content ?? '',
+      images: getImages(stimulus.images),
     })),
 
     questions: questionsResult.docs.map((question) => {
@@ -83,6 +96,8 @@ export async function getExamConsultationData(examId: string) {
         number: question.questionNumber ?? null,
         type: question.questionType ?? null,
         question: question.questionText ?? '',
+
+        images: getImages(question.images),
 
         ...(question.questionType === 'mcq' && question.options
           ? {
