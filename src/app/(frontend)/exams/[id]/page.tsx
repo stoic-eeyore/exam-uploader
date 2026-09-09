@@ -213,7 +213,16 @@ export default async function ExamPage({ params }: { params: Promise<{ id: strin
         </div>
       </div>
 
-      <ExamReview examId={String(exam.id)} review={exam.examReview as ExamReviewData} />
+      <ExamReview
+        examId={String(exam.id)}
+        review={exam.examReview as ExamReviewData}
+        questionReviews={questions.docs.map((q) => ({
+          questionId: q.id,
+          questionNumber: q.questionNumber ?? 0,
+          questionType: q.questionType ?? 'mcq',
+          cognitiveLevel: (q.cognitiveLevel ?? 'lots') as any,
+        }))}
+      />
 
       <div>
         <div className="flex justify-end mb-4">
