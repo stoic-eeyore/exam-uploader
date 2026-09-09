@@ -100,7 +100,6 @@ function DimensionRow({ label, dimension }: { label: string; dimension?: Dimensi
       <div>
         {' '}
         <div className="text-sm font-medium text-gray-900">{label}</div>
-        ```
         {dimension.explanation && (
           <p className="mt-1 text-sm leading-5 text-gray-600">{dimension.explanation}</p>
         )}
