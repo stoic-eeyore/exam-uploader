@@ -175,7 +175,43 @@ export async function reviewExam(examId: string) {
   })
 
   const cleaned = extractJson(text)
-  const parsed = JSON.parse(cleaned)
+
+  let parsed
+
+  try {
+    parsed = JSON.parse(cleaned)
+  } catch (error) {
+    console.error('❌ Failed to parse Gemini JSON')
+    console.error('JSON length:', cleaned.length)
+
+    if (error instanceof SyntaxError) {
+      const match = error.message.match(/position (\d+)/)
+
+      if (match) {
+        const position = Number(match[1])
+
+        console.error('❌ Error position:', position)
+
+        console.error(
+          '🔍 JSON around error:',
+          cleaned.slice(Math.max(0, position - 500), Math.min(cleaned.length, position + 500)),
+        )
+
+        console.error('🔍 Character at error:', JSON.stringify(cleaned[position]))
+
+        console.error(
+          '🔍 Character codes:',
+          cleaned
+            .slice(Math.max(0, position - 10), position + 10)
+            .split('')
+            .map((char) => `${JSON.stringify(char)}=${char.charCodeAt(0)}`)
+            .join(' '),
+        )
+      }
+    }
+
+    throw error
+  }
 
   console.log(`Parsed AI review for exam ${exam.id}`)
 

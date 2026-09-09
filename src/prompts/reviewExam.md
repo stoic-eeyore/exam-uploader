@@ -64,18 +64,28 @@ Questions primarily requiring:
 * constructing arguments
 * application in unfamiliar or non-routine contexts
 
-IMPORTANT:
+### COGNITIVE CLASSIFICATION RULE
 
-Classify based on the cognitive PROCESS required to answer correctly,
-NOT based on how difficult the question appears.
+Assign the level based on the minimum cognitive process required to answer the question correctly.
 
-A difficult trivia question is still LOTS if it only requires recall.
+Do not classify a question at a higher level merely because:
 
-A long calculation is not automatically HOTS if it only requires applying
-a routine algorithm.
+* it contains multiple steps
+* it contains a large amount of text
+* it uses a real-world context
+* it requires calculation
+* it uses a graph, diagram, table, or other stimulus
+* the mathematics or subject content is advanced
+* the question is difficult
 
-Do not classify based on the wording alone. Consider what the student must
-actually think or do to arrive at the answer.
+For example:
+
+* A routine calculation using a real-world context may still be LOTS.
+* Reading a graph and directly identifying a value may still be LOTS.
+* Applying a familiar concept to a familiar situation may be MOTS.
+* A question requiring students to analyze relationships, evaluate alternatives, justify a conclusion, or solve a genuinely non-routine problem may be HOTS.
+
+When uncertain between two levels, choose the lower level unless the higher cognitive process is clearly necessary to obtain the answer.
 
 ---
 
