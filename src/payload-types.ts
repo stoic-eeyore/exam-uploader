@@ -333,6 +333,7 @@ export interface GeminiMapping {
 export interface Question {
   id: number;
   exam?: (number | null) | Exam;
+  deletedAt?: string | null;
   questionNumber?: number | null;
   grade?: (number | null) | Grade;
   subject?: (number | null) | Subject;
@@ -660,6 +661,7 @@ export interface GeminiMappingsSelect<T extends boolean = true> {
  */
 export interface QuestionsSelect<T extends boolean = true> {
   exam?: T;
+  deletedAt?: T;
   questionNumber?: T;
   grade?: T;
   subject?: T;

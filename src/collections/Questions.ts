@@ -1,7 +1,20 @@
 import { CollectionConfig } from 'payload'
+import type { Access } from 'payload'
+
+const readActiveQuestions: Access = ({ req }) => {
+  return {
+    deletedAt: {
+      exists: false,
+    },
+  }
+}
 
 export const Questions: CollectionConfig = {
   slug: 'questions',
+
+  access: {
+    read: readActiveQuestions,
+  },
 
   hooks: {
     beforeChange: [
@@ -35,6 +48,12 @@ export const Questions: CollectionConfig = {
       type: 'relationship',
       relationTo: 'exams',
       required: false,
+    },
+
+    {
+      name: 'deletedAt',
+      type: 'date',
+      index: true,
     },
 
     {
