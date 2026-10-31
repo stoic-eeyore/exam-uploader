@@ -4,6 +4,16 @@ import { getActiveGeminiFile } from './geminiFiles'
 import { extractJson } from '@/utils/json'
 import { geminiModel } from '@/lib/gemini'
 import { relationshipId } from './payload/relationshipId'
+import { ensureExamAssets } from './examAssets'
+
+// @ts-ignore
+// import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.mjs'
+
+// 2. Prevent the fake-worker/web-worker crash entirely on the server
+// if (typeof window === 'undefined') {
+//   // @ts-ignore - Suppresses the "missing type declarations" warning safely
+//   pdfjs.GlobalWorkerOptions.workerSrc = false
+// }
 
 export async function extractExamQuestions(examId: string) {
   const payload = await getPayload({
@@ -30,6 +40,12 @@ export async function extractExamQuestions(examId: string) {
   })
 
   try {
+    await ensureExamAssets({
+      payload,
+      examId,
+      driveUrl: exam.driveUrl,
+    })
+
     const text = exam.aiRawResponse || (await queryGemini(payload, exam))
 
     // 6. parse json

@@ -7,6 +7,8 @@ const __filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(__filename)
 
 const nextConfig: NextConfig = {
+  serverExternalPackages: ['pdf-parse', '@napi-rs/canvas'],
+
   images: {
     localPatterns: [
       {

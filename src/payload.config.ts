@@ -16,6 +16,7 @@ import { Subjects } from './collections/Subjects'
 import { Labels } from './collections/Labels'
 import { Questions } from './collections/Questions'
 import { Stimuli } from './collections/Stimuli'
+import { ExamAssets } from './collections/ExamAssets'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -38,6 +39,7 @@ export default buildConfig({
     GeminiMappings,
     Questions,
     Stimuli,
+    ExamAssets,
   ],
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',

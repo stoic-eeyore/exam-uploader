@@ -177,16 +177,67 @@ export const Exams: CollectionConfig = {
       name: 'examReview',
       type: 'json',
     },
+
+    {
+      name: 'assetsProcessingStatus',
+      type: 'select',
+      defaultValue: 'pending',
+      options: [
+        { label: 'Pending', value: 'pending' },
+        { label: 'Processing', value: 'processing' },
+        { label: 'Complete', value: 'complete' },
+        { label: 'Failed', value: 'failed' },
+      ],
+      admin: {
+        description: 'Status of extracting images/assets from the exam PDF.',
+      },
+    },
+
+    {
+      name: 'assetsProcessingError',
+      type: 'textarea',
+      admin: {
+        readOnly: true,
+      },
+    },
+
+    {
+      name: 'assetsProcessingStartedAt',
+      type: 'date',
+      admin: {
+        readOnly: true,
+      },
+    },
+
+    {
+      name: 'assetsProcessedAt',
+      type: 'date',
+      admin: {
+        readOnly: true,
+      },
+    },
+
+    {
+      name: 'assetsExtractionVersion',
+      type: 'number',
+      admin: {
+        readOnly: true,
+        description: 'Increment when the image extraction algorithm changes.',
+      },
+    },
   ],
 
   hooks: {
     beforeChange: [
       async ({ data, req }) => {
         // ✅ Auto-set metadata
-        if (req.user) {
+        if (req.user && !data.uploadedBy) {
           data.uploadedBy = req.user.id
         }
-        data.uploadedAt = new Date()
+
+        if (!data.uploadedAt) {
+          data.uploadedAt = new Date()
+        }
 
         // ✅ Auto-generate title if missing
         if (!data.title && data.grade && data.subject && data.label) {

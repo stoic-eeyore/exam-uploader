@@ -77,6 +77,7 @@ export interface Config {
     'gemini-mappings': GeminiMapping;
     questions: Question;
     stimuli: Stimulus;
+    'exam-assets': ExamAsset;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -94,6 +95,7 @@ export interface Config {
     'gemini-mappings': GeminiMappingsSelect<false> | GeminiMappingsSelect<true>;
     questions: QuestionsSelect<false> | QuestionsSelect<true>;
     stimuli: StimuliSelect<false> | StimuliSelect<true>;
+    'exam-assets': ExamAssetsSelect<false> | ExamAssetsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -281,6 +283,17 @@ export interface Exam {
     | number
     | boolean
     | null;
+  /**
+   * Status of extracting images/assets from the exam PDF.
+   */
+  assetsProcessingStatus?: ('pending' | 'processing' | 'complete' | 'failed') | null;
+  assetsProcessingError?: string | null;
+  assetsProcessingStartedAt?: string | null;
+  assetsProcessedAt?: string | null;
+  /**
+   * Increment when the image extraction algorithm changes.
+   */
+  assetsExtractionVersion?: number | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -418,6 +431,25 @@ export interface Stimulus {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "exam-assets".
+ */
+export interface ExamAsset {
+  id: number;
+  exam: number | Exam;
+  page: number;
+  imageIndex: number;
+  width?: number | null;
+  height?: number | null;
+  extractionVersion: number;
+  imageUrl: string;
+  cloudinaryPublicId: string;
+  cloudinaryAssetId: string;
+  mimeType: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -479,6 +511,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'stimuli';
         value: number | Stimulus;
+      } | null)
+    | ({
+        relationTo: 'exam-assets';
+        value: number | ExamAsset;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -620,6 +656,11 @@ export interface ExamsSelect<T extends boolean = true> {
   uploadedBy?: T;
   uploadedAt?: T;
   examReview?: T;
+  assetsProcessingStatus?: T;
+  assetsProcessingError?: T;
+  assetsProcessingStartedAt?: T;
+  assetsProcessedAt?: T;
+  assetsExtractionVersion?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -740,6 +781,24 @@ export interface StimuliSelect<T extends boolean = true> {
         id?: T;
       };
   status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "exam-assets_select".
+ */
+export interface ExamAssetsSelect<T extends boolean = true> {
+  exam?: T;
+  page?: T;
+  imageIndex?: T;
+  width?: T;
+  height?: T;
+  extractionVersion?: T;
+  imageUrl?: T;
+  cloudinaryPublicId?: T;
+  cloudinaryAssetId?: T;
+  mimeType?: T;
   updatedAt?: T;
   createdAt?: T;
 }

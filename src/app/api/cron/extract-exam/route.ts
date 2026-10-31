@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { BasePayload, getPayload } from 'payload'
+import { BasePayload, getPayload, Where } from 'payload'
 import config from '@payload-config'
 import { extractExamQuestions } from '@/lib/examExtraction'
 import { reviewExamQuestions } from '@/lib/reviewExamQuestions'
@@ -16,22 +16,27 @@ export async function GET(req: NextRequest) {
 
   const payload = await getPayload({ config })
 
-  await extractExam(payload)
-  await reviewExam(payload)
+  const { searchParams } = new URL(req.url)
+  const examId = searchParams.get('examId')
 
+  if (examId) {
+    await extractExam(payload, examId)
+  } else {
+    await reviewExam(payload)
+  }
   return NextResponse.json({
     success: true,
   })
 }
 
-async function extractExam(payload: BasePayload) {
+async function extractExam(payload: BasePayload, examId?: string) {
+  const whereCondition: Where = examId
+    ? { id: { equals: examId } }
+    : { processingStatus: { equals: 'uploaded' } }
+
   const result = await payload.find({
     collection: 'exams',
-    where: {
-      processingStatus: {
-        equals: 'uploaded',
-      },
-    },
+    where: whereCondition,
     sort: 'createdAt',
     limit: 1,
     depth: 0,
