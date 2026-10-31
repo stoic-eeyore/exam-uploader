@@ -22,6 +22,7 @@ export async function GET(req: NextRequest) {
   if (examId) {
     await extractExam(payload, examId)
   } else {
+    await extractExam(payload)
     await reviewExam(payload)
   }
   return NextResponse.json({

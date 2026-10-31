@@ -6,15 +6,6 @@ import { geminiModel } from '@/lib/gemini'
 import { relationshipId } from './payload/relationshipId'
 import { ensureExamAssets } from './examAssets'
 
-// @ts-ignore
-// import * as pdfjs from 'pdfjs-dist/legacy/build/pdf.mjs'
-
-// 2. Prevent the fake-worker/web-worker crash entirely on the server
-// if (typeof window === 'undefined') {
-//   // @ts-ignore - Suppresses the "missing type declarations" warning safely
-//   pdfjs.GlobalWorkerOptions.workerSrc = false
-// }
-
 export async function extractExamQuestions(examId: string) {
   const payload = await getPayload({
     config,
@@ -46,6 +37,23 @@ export async function extractExamQuestions(examId: string) {
       driveUrl: exam.driveUrl,
     })
 
+    // Load the extracted images from Payload.
+    const assetResult = await payload.find({
+      collection: 'exam-assets',
+      where: {
+        exam: {
+          equals: examId,
+        },
+      },
+      limit: 1000,
+      pagination: false,
+      sort: 'page',
+    })
+
+    const assets = assetResult.docs
+    const assetsById = new Map(assets.map((asset: any) => [String(asset.id), asset]))
+    console.log(`Loaded ${assets.length} image assets for exam ${examId}`)
+
     const text = exam.aiRawResponse || (await queryGemini(payload, exam))
 
     // 6. parse json
@@ -65,7 +73,7 @@ export async function extractExamQuestions(examId: string) {
             exam: exam.id,
             stimulusNumber: stim.stimulusNumber,
             content: stim.content,
-            images: [], // Gemini can't generate image URLs from a PDF; populate later
+            images: resolveImages(stim.imageAssetIds, assetsById),
             status: 'active',
           },
         })
@@ -100,6 +108,7 @@ export async function extractExamQuestions(examId: string) {
             question.choices?.map((choice: any) => ({
               text: choice.text,
             })) ?? [],
+          images: resolveImages(question.imageAssetIds, assetsById),
           status: 'draft',
         },
       })
@@ -143,6 +152,26 @@ async function queryGemini(payload: any, exam: any) {
 
   // 4. extract text
   console.log(`Starting extraction for ${exam.id} from Gemini`)
+  const assets = await loadExamAssets(payload, exam.id)
+
+  const imageParts: any[] = []
+
+  for (const asset of assets) {
+    imageParts.push({
+      text: [
+        'EXTRACTED EXAM IMAGE',
+        `Asset ID: ${asset.id}`,
+        `PDF page: ${asset.page}`,
+        `Image index: ${asset.imageIndex}`,
+        `Dimensions: ${asset.width ?? '?'} x ${asset.height ?? '?'}`,
+      ].join('\n'),
+    })
+
+    imageParts.push(await assetToGeminiPart(asset))
+  }
+
+  console.log(`Sending PDF and ${assets.length} images to Gemini for exam ${exam.id}`)
+
   const result = await geminiModel.generateContent([
     {
       fileData: {
@@ -192,12 +221,27 @@ CRITICAL EXAMPLES:
 - WRONG: C6H12O6 --> RIGHT: $C_6H_{12}O_{6}$
 - WRONG: SO42- --> RIGHT: $SO_4^{2-}$
 
+### LAYER 3: IMAGE ASSOCIATION RULES
+
+You will receive extracted images from the exam PDF.
+Each image is labelled with its exact Payload asset ID and original PDF page number.
+
+For each stimulus and question, return an imageAssetIds array.
+
+Rules:
+1. Use only the exact asset IDs supplied.
+2. Return [] if no extracted image belongs to the item.
+3. Associate images with the question or stimulus they actually illustrate, using the PDF layout and context.
+4. If an image belongs to a shared stimulus, associate it with the stimulus rather than duplicating it on questions.
+5. Do not invent URLs or asset IDs.
+
 ### OUTPUT FORMAT
 {
   "stimuli": [
     {
       "stimulusNumber": 1,
-      "content": "In photosynthesis, plants convert $CO_2$ and $H_2O$ into glucose...\n\n| Factor | Rate |\n|---|---|\n| Light | High |\n| Dark | Low |"
+      "content": "In photosynthesis, plants convert $CO_2$ and $H_2O$ into glucose...\n\n| Factor | Rate |\n|---|---|\n| Light | High |\n| Dark | Low |",
+      "imageAssetIds": ["asset-id-123"]
     }
   ],
   "questions": [
@@ -207,6 +251,7 @@ CRITICAL EXAMPLES:
       "questionType": "mcq",
       "confidence": 95,
       "questionText": "Based on the information above, which compound is reduced?",
+      "imageAssetIds": ["asset-id-456"],
       "choices": [
         { "key": "A", "text": "$CO_2$" },
         { "key": "B", "text": "$H_2O$" }
@@ -227,6 +272,7 @@ CRITICAL EXAMPLES:
 }
 `,
     },
+    ...imageParts,
   ])
 
   console.log(`Gemini query complete for ${exam.id}`)
@@ -241,4 +287,68 @@ CRITICAL EXAMPLES:
   })
 
   return text
+}
+
+async function loadExamAssets(payload: any, examId: string) {
+  const result = await payload.find({
+    collection: 'exam-assets',
+    where: {
+      exam: { equals: examId },
+    },
+    limit: 1000,
+    pagination: false,
+    sort: 'page',
+  })
+
+  return result.docs
+}
+
+async function assetToGeminiPart(asset: any) {
+  const response = await fetch(asset.imageUrl)
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch exam asset ${asset.id}: ${response.status}`)
+  }
+
+  const buffer = Buffer.from(await response.arrayBuffer())
+  const responseMimeType = response.headers.get('content-type')?.split(';')[0].trim()
+
+  const mimeType = responseMimeType?.startsWith('image/') ? responseMimeType : asset.mimeType
+
+  if (!mimeType.startsWith('image/')) {
+    throw new Error(`Invalid image MIME type for asset ${asset.id}: ${mimeType}`)
+  }
+
+  return {
+    inlineData: {
+      mimeType,
+      data: buffer.toString('base64'),
+    },
+  }
+}
+
+function resolveImages(assetIds: unknown, assetsById: Map<string, any>) {
+  if (!Array.isArray(assetIds)) return []
+
+  return assetIds.flatMap((id) => {
+    if (typeof id !== 'string' && typeof id !== 'number') {
+      return []
+    }
+
+    const asset = assetsById.get(String(id))
+
+    if (!asset) {
+      console.warn(`Unknown exam asset ID returned by Gemini: ${id}`)
+      return []
+    }
+
+    return [
+      {
+        url: asset.imageUrl,
+        placement: 'auto' as const,
+        width: asset.width || undefined,
+        alt: '',
+      },
+    ]
+  })
 }
