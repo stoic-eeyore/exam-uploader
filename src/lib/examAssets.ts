@@ -172,7 +172,6 @@ export async function ensureExamAssets({ payload, examId, driveUrl }: EnsureExam
         collection: 'exam-assets',
         data: {
           exam: Number(examId),
-          filename,
           imageUrl: uploaded.imageUrl,
           cloudinaryPublicId: uploaded.cloudinaryPublicId,
           cloudinaryAssetId: uploaded.cloudinaryAssetId,
