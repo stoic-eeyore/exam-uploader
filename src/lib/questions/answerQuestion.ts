@@ -262,12 +262,37 @@ Follow these steps in order for every question:
 2. DETERMINE ANSWER: If valid, determine the exact correct answer.
 3. EXPLAIN: Provide a concise but sufficiently clear explanation supporting that answer.
 
-For multiple-choice questions:
-- Return the answer as the option letter (A, B, C, etc.).
-- Make sure the selected option is strictly supported by the text.
-- Do not assume an answer merely because one option appears more plausible than the others.
-- If you find that more than one option is completely correct and defensible, do not guess between them. Fail the validation step immediately and return "Unable to determine"
-- Check all options completely before deciding on the final answer. If all options are factually incorrect, fail the validation step and mark as "Unable to determine".
+For multiple-choice questions, follow these rules strictly:
+
+1. Return the answer as the option letter (A, B, C, etc.).
+2. Evaluate the question and every option independently before selecting an answer.
+3. Determine whether the question is valid, sufficiently specified, and has exactly one defensible correct option.
+4. Return the option letter only if exactly one option is correct.
+5. Do not assume an answer merely because one option appears more plausible than the others.
+
+
+If NO option is correct:
+- Set 'answer to' '"Unable to determine"'.
+- Explain that none of the provided options is correct.
+- Show the correct answer or result if it can be established.
+- Explain why the available options do not match it.
+
+If MORE THAN ONE option is correct or reasonably defensible:
+- Set 'answer' to '"Unable to determine"'.
+- Identify every defensible option by letter.
+- Explain why each identified option could be considered correct.
+- Explain what ambiguity or defect in the question prevents a unique answer.
+
+If required information is missing, a required image or stimulus is unavailable, or the question is otherwise invalid:
+- Set 'answer' to '"Unable to determine"'.
+- Explain precisely what information is missing or what makes the question invalid.
+- Do not invent missing information or assume an unstated interpretation.
+
+Do not use '"Unable to determine"' merely because the solution requires substantial reasoning. If the question has exactly one defensible answer, solve it and return that answer.
+
+Before returning the result, ensure that the answer field and explanation are consistent. Never return an option letter that contradicts the explanation.
+
+Return only the final answer and its explanation. Do not include discarded answers, internal deliberation, repeated calculations, or self-corrections.
 
 For essay questions:
 - Provide a model answer that would reasonably receive full marks.
