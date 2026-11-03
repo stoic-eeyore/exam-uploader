@@ -342,5 +342,40 @@ export const Questions: CollectionConfig = {
       type: 'relationship',
       relationTo: 'stimuli',
     },
+
+    {
+      name: 'validityStatus',
+      type: 'select',
+      options: [
+        { label: 'Valid', value: 'valid' },
+        { label: 'Ambiguous', value: 'ambiguous' },
+        { label: 'Invalid', value: 'invalid' },
+      ],
+      admin: {
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'validityConfidence',
+      type: 'number',
+      min: 0,
+      max: 100,
+      admin: {
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'answerConfidence',
+      type: 'number',
+      min: 0,
+      max: 100,
+      admin: {
+        position: 'sidebar',
+      },
+    },
+    {
+      name: 'answerNotes',
+      type: 'textarea',
+    },
   ],
 }

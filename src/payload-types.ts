@@ -404,6 +404,10 @@ export interface Question {
       }[]
     | null;
   stimulus?: (number | null) | Stimulus;
+  validityStatus?: ('valid' | 'ambiguous' | 'invalid') | null;
+  validityConfidence?: number | null;
+  answerConfidence?: number | null;
+  answerNotes?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -760,6 +764,10 @@ export interface QuestionsSelect<T extends boolean = true> {
         id?: T;
       };
   stimulus?: T;
+  validityStatus?: T;
+  validityConfidence?: T;
+  answerConfidence?: T;
+  answerNotes?: T;
   updatedAt?: T;
   createdAt?: T;
 }

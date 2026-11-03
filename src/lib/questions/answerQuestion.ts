@@ -23,11 +23,17 @@ type StimulusForAI = {
   images: string[]
 }
 
+type ValidityStatus = 'valid' | 'ambiguous' | 'invalid'
+
 type AIAnswer = {
   questionNumber: number
   questionType: 'mcq' | 'essay'
+  validityStatus: ValidityStatus
+  validityConfidence: number
+  answerConfidence: number
   answer: string
   explanation: string
+  notes: string
 }
 
 type AIResponse = {
@@ -324,20 +330,64 @@ $$
 - questionNumber and questionType must exactly match the input.
 - Return ONLY valid JSON. Do not wrap the JSON in markdown code fences or backticks.
 
+CONFIDENCE AND DIAGNOSTIC FIELDS:
+
+For every question, return these additional fields:
+
+1. validityStatus:
+   - "valid": The question is sufficiently clear and has exactly one defensible answer.
+   - "ambiguous": The question has multiple reasonable interpretations or multiple defensible answers.
+   - "invalid": The question is missing essential information, contains a fundamental error, or cannot be answered reliably.
+
+2. validityConfidence:
+   - An integer from 0 to 100.
+   - Represents your confidence in your validityStatus assessment.
+   - This is NOT your confidence in the answer.
+
+3. answerConfidence:
+   - An integer from 0 to 100.
+   - Represents your confidence that the proposed answer is correct.
+   - Use 0 when you cannot establish an answer reliably.
+
+4. notes:
+   - Brief teacher-facing diagnostic notes.
+   - Mention assumptions, possible wording problems, calculation concerns,
+     or anything a teacher should double-check.
+   - If there is nothing worth highlighting, return an empty string.
+   - Do not include private internal deliberation or hidden chain-of-thought.
+   - Do not repeat the student-facing explanation.
+
+IMPORTANT:
+- validityStatus and answerConfidence are independent.
+- A valid question can still have a low answerConfidence if solving it is difficult.
+- A high answerConfidence does not make an invalid question valid.
+- Do not inflate confidence scores. Be appropriately cautious.
+- If answer is "Unable to determine", answerConfidence must be 0.
+- If validityStatus is "ambiguous" or "invalid", answer must be "Unable to determine".
+- Return confidence values as integers, not strings.
+
 Expected format:
 {
   "answers": [
     {
       "questionNumber": 1,
       "questionType": "mcq",
+      "validityStatus": "valid",
+      "validityConfidence": 98,
+      "answerConfidence": 95,
       "answer": "B",
-      "explanation": "Step-by-step logic proving why B is correct..."
+      "explanation": "The calculation gives ...",
+      "notes": "The calculation was checked against all options."
     },
     {
       "questionNumber": 2,
       "questionType": "mcq",
+      "validityStatus": "invalid",
+      "validityConfidence": 100,
+      "answerConfidence": 0,
       "answer": "Unable to determine",
-      "explanation": "Validation failed: The question asks to identify a feature in Diagram A, but no diagram or stimulus payload was provided."
+      "explanation": "The question refers to a diagram that was not provided.",
+      "notes": "Teacher should check whether the diagram was accidentally omitted."
     }
   ]
 }
@@ -433,6 +483,8 @@ ${JSON.stringify(input, null, 2)}
     questions.map((question) => [`${question.questionNumber}_${question.questionType}`, question]),
   )
 
+  const validStatuses: ValidityStatus[] = ['valid', 'ambiguous', 'invalid']
+
   for (const answer of parsed.answers) {
     const question = questionMap.get(`${answer.questionNumber}_${answer.questionType}`)
 
@@ -443,8 +495,34 @@ ${JSON.stringify(input, null, 2)}
       continue
     }
 
-    if (!answer.answer || !answer.explanation) {
-      console.warn(`[answer-questions] Incomplete answer for question ${answer.questionNumber}`)
+    const confidenceIsValid = (value: unknown): value is number =>
+      Number.isInteger(value) && Number(value) >= 0 && Number(value) <= 100
+
+    if (
+      !answer.answer ||
+      !answer.explanation ||
+      !validStatuses.includes(answer.validityStatus) ||
+      !confidenceIsValid(answer.validityConfidence) ||
+      !confidenceIsValid(answer.answerConfidence) ||
+      typeof answer.notes !== 'string'
+    ) {
+      console.warn(
+        `[answer-questions] Invalid or incomplete response for question ${answer.questionNumber}`,
+      )
+      continue
+    }
+
+    if (answer.validityStatus !== 'valid' && answer.answer !== 'Unable to determine') {
+      console.warn(
+        `[answer-questions] Inconsistent validity and answer for question ${answer.questionNumber}`,
+      )
+      continue
+    }
+
+    if (answer.answer === 'Unable to determine' && answer.answerConfidence !== 0) {
+      console.warn(
+        `[answer-questions] Invalid answer confidence for question ${answer.questionNumber}`,
+      )
       continue
     }
 
@@ -454,6 +532,10 @@ ${JSON.stringify(input, null, 2)}
       data: {
         answer: answer.answer,
         explanation: answer.explanation,
+        validityStatus: answer.validityStatus,
+        validityConfidence: answer.validityConfidence,
+        answerConfidence: answer.answerConfidence,
+        answerNotes: answer.notes,
         answerAiRawResponse: text,
       },
     })
