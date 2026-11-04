@@ -255,153 +255,45 @@ async function answerQuestionBatch(
   }
 
   const prompt = `
-You are an expert educational assessment solver.
+  You are an expert educational assessment solver specializing in STEM and general academic testing.
 
-Your task is to first evaluate the validity of each exam question provided below, and then solve it if it is valid.
+Your task is to evaluate the validity of each question provided, solve it independently, and return a structured JSON response.
 
-## REQUIRED SOLVING PROCEDURE
+## EVALUATION & SOLVING PROCEDURE
 
-For every question, follow these steps in order. These are internal working steps; return only the final result in the required JSON format.
+For each question, complete these steps in order:
+1. Validate Question: Check if the question is complete, clear, and uncorrupted. Verify if required stimulus/images are present. For multiple-choice questions, check that exactly one option is defensibly correct.
+2. Solve Independently: Derive the answer step-by-step from core principles, chemical properties, or mathematical formulas without relying on the given options.
+3. Match & Verify: Compare your derived result against all options (for MCQs). Verify that your answer, explanation, reasoning, and confidence scores are fully consistent with each other.
 
-### Step 1: Validate the question
-Determine whether the question is sufficiently clear, complete, and answerable. For multiple-choice questions, check whether exactly one option is defensibly correct.
+## SPECIFIC QUESTION-TYPE RULES
 
-If the question is invalid or ambiguous, follow the existing rules for returning "Unable to determine".
+### Multiple-Choice Questions (MCQ)
+- If valid with exactly ONE correct option: Set \`answer\` to the option letter (e.g., "A", "B", "C").
+- If NO option is correct, MORE THAN ONE option is correct, or essential information/images are missing:
+  - Set \`validityStatus\` to \`"invalid"\` or \`"ambiguous"\`.
+  - Set \`answer\` to \`"Unable to determine"\`.
+  - Set \`answerConfidence\` to \`0\`.
+  - In \`explanation\`, specify exactly why the question is invalid, ambiguous, or missing data, and state the true answer if it can be derived.
 
-### Step 2: Solve independently of the options
-Solve the question without using the answer options to decide what the answer should be.
+### Essay / Free-Response Questions
+- Set \`answer\` to a comprehensive model answer that warrants full marks.
+- Include key structural criteria, required terminology, and rubric points in \`explanation\`.
 
-For numerical questions:
-- Write down the relevant formula or method.
-- Substitute the given values.
-- Calculate the result carefully.
-- Check the arithmetic, including multiplication, powers, fractions, and unit conversions.
+## CONFIDENCE & VALIDITY DEFINITIONS
+- \`validityStatus\`: \`"valid"\` (clear, single correct answer), \`"ambiguous"\` (multiple reasonable interpretations or correct answers), or \`"invalid"\` (missing essential data, broken image, or conceptually flawed).
+- \`validityConfidence\`: Integer from 0 to 100 representing confidence in your \`validityStatus\` assessment.
+- \`answerConfidence\`: Integer from 0 to 100 representing confidence in your derived \`answer\` (must be 0 if \`answer\` is "Unable to determine").
 
-For conceptual questions, establish the correct conclusion from the relevant principles.
+## FORMATTING & OUTPUT RULES
 
-### Step 3: Match the result to the options
-Only after establishing the result, compare it against every answer option.
+Return ONLY valid JSON matching the schema below. Your response must begin immediately with \`{\` and end with \`}\`. Do not include markdown code fences (\`\`\`json), backticks, or text outside the JSON object.
 
-For each option, determine whether it matches the independently established result. Return the letter of the matching option only if exactly one option is correct.
+1. Markdown & LaTeX Allowed: You MAY use standard Markdown (lists, bolding) and LaTeX notation for math formulas and chemistry equations inside string fields (\`reasoning\`, \`answer\`, \`explanation\`).
+2. Mandatory Double-Escaping: Strictly double-escape all backslashes used in LaTeX or formatting within JSON string values (for example, write \`\\frac{a}{b}\`, \`\\rightarrow\`, and \`\\Delta H\` instead of single backslashes) to ensure the payload parses cleanly in JSON parsers.
 
-Do not select an option merely because it looks plausible or because it matches an answer you initially considered.
+EXPECTED JSON SCHEMA EXAMPLE:
 
-### Step 4: Perform a final consistency check
-Before returning the JSON, verify all of the following:
-
-1. The answer field contains the correct option letter (if multiple choice question).
-2. That option's actual text matches the independently established result (if multiple choice question).
-3. The explanation supports the answer field.
-4. The answer field does not contradict any conclusion stated in the explanation.
-5. The validityStatus and confidence fields are consistent with the assessment.
-
-If you discover a contradiction, resolve it before returning the response. Do not return the contradictory draft.
-
-### Step 5: Write the final explanation
-Write a concise explanation containing only the final reasoning and conclusion.
-
-Do not include internal deliberation, tentative answers, self-corrections, discarded answers, or phrases such as "wait, let's recalculate".
-
-
-For multiple-choice questions, follow these rules strictly:
-
-1. Return the answer as the option letter (A, B, C, etc.).
-2. Evaluate the question and every option independently before selecting an answer.
-3. Determine whether the question is valid, sufficiently specified, and has exactly one defensible correct option.
-4. Return the option letter only if exactly one option is correct.
-5. Do not assume an answer merely because one option appears more plausible than the others.
-
-
-If NO option is correct:
-- Set 'answer to' '"Unable to determine"'.
-- Explain that none of the provided options is correct.
-- Show the correct answer or result if it can be established.
-- Explain why the available options do not match it.
-
-If MORE THAN ONE option is correct or reasonably defensible:
-- Set 'answer' to '"Unable to determine"'.
-- Identify every defensible option by letter.
-- Explain why each identified option could be considered correct.
-- Explain what ambiguity or defect in the question prevents a unique answer.
-
-If required information is missing, a required image or stimulus is unavailable, or the question is otherwise invalid:
-- Set 'answer' to '"Unable to determine"'.
-- Explain precisely what information is missing or what makes the question invalid.
-- Do not invent missing information or assume an unstated interpretation.
-
-Do not use '"Unable to determine"' merely because the solution requires substantial reasoning. If the question has exactly one defensible answer, solve it and return that answer.
-
-Before returning the result, ensure that the answer field and explanation are consistent. Never return an option letter that contradicts the explanation.
-
-Return only the final answer and its explanation. Do not include discarded answers, internal deliberation, repeated calculations, or self-corrections.
-
-For essay questions:
-- Provide a model answer that would reasonably receive full marks.
-- The answer must directly address what the question asks.
-- Include the key structural points that a strong student answer should contain.
-
-Context, Stimulus, and Image Rules:
-
-- Some questions reference a stimulus through stimulusId.
-- When a question contains a stimulusId, use the corresponding stimulus content AND all images associated with that stimulus.
-- Questions may also have images directly associated with the question. These images are provided separately as actual image inputs.
-- Do not assume that an image is decorative. Carefully inspect every provided image when determining whether the question can be answered.
-- If the question depends on information contained in an image, diagram, graph, chart, map, table, photograph, or other visual, you MUST inspect the actual image before answering.
-- If a required image is missing, unreadable, too ambiguous, or does not contain enough information to answer the question reliably, fail validation.
-- Do not infer or invent visual information that cannot be reliably determined from the provided image.
-- If a question references a stimulus or image that is not actually provided, set the answer to "Unable to determine" and explain exactly what is missing.
-- Images associated with a stimulus are available to every question referencing that stimulus.
-- Images associated directly with a question apply only to that question.
-
-Formatting Rules:
-- The explanation may use Markdown and LaTeX where appropriate.
-- For mathematical formulas, use standard Markdown-compatible LaTeX notation such as:
-$$
-x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}
-$$
-- Analyze every question completely independently. Do not carry over data between questions.
-- Do not modify the question text or skip any question.
-- Return exactly one result for every input question.
-- questionNumber and questionType must exactly match the input.
-- Return ONLY valid JSON. Do not wrap the JSON in markdown code fences or backticks.
-
-CONFIDENCE AND DIAGNOSTIC FIELDS:
-
-For every question, return these additional fields:
-
-1. validityStatus:
-   - "valid": The question is sufficiently clear and has exactly one defensible answer.
-   - "ambiguous": The question has multiple reasonable interpretations or multiple defensible answers.
-   - "invalid": The question is missing essential information, contains a fundamental error, or cannot be answered reliably.
-
-2. validityConfidence:
-   - An integer from 0 to 100.
-   - Represents your confidence in your validityStatus assessment.
-   - This is NOT your confidence in the answer.
-
-3. answerConfidence:
-   - An integer from 0 to 100.
-   - Represents your confidence that the proposed answer is correct.
-   - Use 0 when you cannot establish an answer reliably.
-
-4. notes:
-   - Brief teacher-facing diagnostic notes.
-   - Mention assumptions, possible wording problems, calculation concerns,
-     or anything a teacher should double-check.
-   - If there is nothing worth highlighting, return an empty string.
-   - Do not include private internal deliberation or hidden chain-of-thought.
-   - Do not repeat the student-facing explanation.
-
-IMPORTANT:
-- validityStatus and answerConfidence are independent.
-- A valid question can still have a low answerConfidence if solving it is difficult.
-- A high answerConfidence does not make an invalid question valid.
-- Do not inflate confidence scores. Be appropriately cautious.
-- If answer is "Unable to determine", answerConfidence must be 0.
-- If validityStatus is "ambiguous" or "invalid", answer must be "Unable to determine".
-- Return confidence values as integers, not strings.
-
-Expected format:
 {
   "answers": [
     {
@@ -410,27 +302,26 @@ Expected format:
       "validityStatus": "valid",
       "validityConfidence": 98,
       "answerConfidence": 95,
-      "answer": "B",
-      "explanation": "The calculation gives ...",
-      "notes": "The calculation was checked against all options."
+      "reasoning": "Step 1: Write the balanced chemical equation: N_2 + 3H_2 \\rightarrow 2NH_3. Step 2: Use equilibrium constant expression K_eq = [NH_3]^2 / ([N_2][H_2]^3). Step 3: Substitute given values: K_eq = (0.40)^2 / ((0.10)(0.20)^3) = 0.16 / 0.0008 = 200. Step 4: Compare with options; Option C matches 200.",
+      "answer": "C",
+      "explanation": "Using the equilibrium expression $K_{eq} = \\frac{[NH_3]^2}{[N_2][H_2]^3}$, substituting the equilibrium concentrations gives $K_{eq} = \\frac{(0.40)^2}{(0.10)(0.20)^3} = 200$."
     },
     {
       "questionNumber": 2,
-      "questionType": "mcq",
-      "validityStatus": "invalid",
+      "questionType": "essay",
+      "validityStatus": "valid",
       "validityConfidence": 100,
-      "answerConfidence": 0,
-      "answer": "Unable to determine",
-      "explanation": "The question refers to a diagram that was not provided.",
-      "notes": "Teacher should check whether the diagram was accidentally omitted."
+      "answerConfidence": 90,
+      "reasoning": "Outline solution steps for quadratic equation ax^2 + bx + c = 0 using the quadratic formula x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}. Derive roots for x^2 - 5x + 6 = 0.",
+      "answer": "To solve $x^2 - 5x + 6 = 0$, apply the quadratic formula $x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}$ with $a=1, b=-5, c=6$. This yields $x = \\frac{5 \\pm \\sqrt{25 - 24}}{2} = \\frac{5 \\pm 1}{2}$, giving roots $x = 3$ and $x = 2$.",
+      "explanation": "A full-mark answer must explicitly state the quadratic formula, show correct substitution of coefficients, evaluate the discriminant ($b^2 - 4ac = 1$), and state both roots."
     }
   ]
 }
-
 Questions:
 
 ${JSON.stringify(input, null, 2)}
-      `
+  `
 
   const imageParts: {
     questionNumber: number
